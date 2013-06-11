@@ -1,0 +1,3 @@
+[submodule "src/gxp"]
+	path = src/gxp
+	url = git://github.com/cga-harvard/gxp.git
