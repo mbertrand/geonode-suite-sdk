@@ -4,8 +4,9 @@
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
- * @requires OpenLayers/Control/TimeManager.js
- * @requires OpenLayers/TimeAgent.js
+ * @requires OpenLayers/Control/DimensionManager.js
+ * @requires OpenLayers/Dimension/Agent.js
+ * @requires OpenLayers/Dimension/Model.js
  */
  
 /** api: (define)
@@ -25,27 +26,44 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     timeManager : null,
     playbackMode : 'track',
     autoPlay : false,
+    aggressive: false,
+    changeBuffer: 10,
     map: null,
     initComponent : function() {
         if(!this.timeManager) {
-            this.timeManager = new OpenLayers.Control.TimeManager();
+            this.timeManager = new OpenLayers.Control.DimensionManager();
             this.map.addControl(this.timeManager);
         }
                 
-        if(this.timeManager.timeAgents) {
-            if(!this.timeManager.units) {
-                this.timeManager.guessPlaybackRate();
+        if(!this.model){
+            this.model = this.timeManager.model;
+        }
+
+        if(this.timeManager.agents) {
+            if(!this.timeManager.timeUnits && !this.timeManager.snapToList) {
+                if(this.model.values && !this.model.resolution && this.timeManager.snapToList !== false){
+                    this.timeManager.snapToList = true;
+                }
+                if(this.model.resolution && !this.model.values && this.model.timeUnits){
+                    this.timeManager.timeUnits = this.model.timeUnits;
+                    this.timeManager.timeStep = this.model.timeStep;
+                }
+                if(this.model.values && this.model.resolution){
+                    //this.manageConflict();
+                }
             }
             if(this.playbackMode && this.playbackMode != 'track') {
-                if(this.timeManager.units) {
-                    this.timeManager.incrementTime(this.timeManager.rangeInterval, this.timeManager.units);
+                if(this.timeManager.timeUnits) {
+                    this.timeManager.incrementTimeValue(this.timeManager.rangeInterval);
                 }
             }
         }
         
         var sliderInfo = this.buildSliderValues();
         if(sliderInfo) {
+            if(!this.timeManager.snapToList && !this.timeManager.timeUnits){
             this.timeManager.guessPlaybackRate();
+            }
             var initialSettings = {
                 maxValue: sliderInfo.maxValue,
                 minValue: sliderInfo.minValue,
@@ -74,7 +92,6 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             [new Ext.slider.Tip({getText:this.getThumbText})]);
 
         this.listeners = Ext.applyIf(this.listeners || {}, {
-            'changecomplete' : this.onSliderChangeComplete,
             'dragstart' : function() {
                 if(this.timeManager.timer) {
                     this.timeManager.stop();
@@ -83,7 +100,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             },
             'beforechange' : function(slider, newVal, oldVal, thumb) {
                 var allow = true;
-                if(!(this.timeManager.units || this.timeManager.snapToIntervals)) {
+                if(!(this.timeManager.timeUnits || this.timeManager.snapToList)) {
                     allow = false;
                 }
                 else if(this.playbackMode == 'cumulative' && slider.indexMap[thumb.index] == 'tail') {
@@ -103,7 +120,11 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             },
             scope : this
         });
-
+        if (this.aggressive === true) {
+            this.listeners['change'] = {fn: this.onSliderChangeComplete, buffer: this.changeBuffer};
+        } else {
+            this.listeners['changecomplete'] = this.onSliderChangeComplete;
+        }
         gxp.slider.TimeSlider.superclass.initComponent.call(this);
     },
 
@@ -123,10 +144,10 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
         var sliderInfo = this.buildSliderValues();
         this.reconfigureSlider(sliderInfo);
         if (this.playbackMode != 'track') {
-            this.timeManager.incrementTime(this.timeManager.rangeInterval, 
-                this.timeManager.units || 
-                    OpenLayers.TimeUnit[gxp.PlaybackToolbar.smartIntervalFormat(sliderInfo.interval).units.toUpperCase()]);
-            this.setValue(0,this.timeManager.currentTime.getTime());
+            if(this.timeManager.rangeInterval){ 
+                this.timeManager.incrementTimeValue(this.timeManager.rangeInterval); 
+                this.setValue(0,this.timeManager.currentValue);
+            }
         }
         this.setThumbStyles();
     },
@@ -139,7 +160,7 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     
     onRangeModified : function(evt) {
         var ctl = this.timeManager;
-        if(!ctl.timeAgents || !ctl.timeAgents.length) {
+        if(!ctl.agents || !ctl.agents.length) {
             //we don't have any time agents which means we should get rid of the time manager control
             //we will automattically add the control back when a time layer is added via handlers on the
             //playback plugin or the application code if the playback toolbar was not build via the plugin
@@ -149,15 +170,15 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
         }
         else {
             var oldvals = {
-                start : ctl.range[0].getTime(),
-                end : ctl.range[1].getTime(),
+                start : ctl.animationRange[0],
+                end : ctl.animationRange[1],
                 resolution : {
                     units : ctl.units,
                     step : ctl.step
                 }
             };
             ctl.guessPlaybackRate();
-            if(ctl.range[0].getTime() != oldvals.start || ctl.range[1].getTime() != oldvals.end ||
+            if(ctl.animationRange[0] != oldvals.start || ctl.animationRange[1] != oldvals.end ||
                  ctl.units != oldvals.units || ctl.step != oldvals.step) {
                 this.reconfigureSlider(this.buildSliderValues());
                 /*
@@ -166,24 +187,24 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                  }
                  */
                 this.setThumbStyles();
-                this.fireEvent('rangemodified', this, ctl.range);
+                this.fireEvent('rangemodified', this, ctl.animationRange);
             }
         }
     },
     
     onTimeTick : function(evt) {
-        var currentTime = evt.currentTime;
-        if (currentTime) {
+        var currentValue = evt.currentValue;
+        if (currentValue) {
             var toolbar = this.refOwner; //TODO use relay event instead
             var tailIndex = this.indexMap ? this.indexMap.indexOf('tail') : -1;
-            var offset = (tailIndex > -1) ? currentTime.getTime() - this.thumbs[0].value : 0;
-            this.setValue(0, evt.currentTime.getTime());
+            var offset = (tailIndex > -1) ? currentValue - this.thumbs[0].value : 0;
+            this.setValue(0, currentValue);
             if(tailIndex > -1) {
                 this.setValue(tailIndex, this.thumbs[tailIndex].value + offset);
             }
             this.updateTimeDisplay();
             //TODO use relay event instead, fire this directly from the slider
-            toolbar.fireEvent('timechange', toolbar, currentTime);
+            toolbar.fireEvent('timechange', toolbar, currentValue);
         }
     },
     
@@ -193,39 +214,33 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
     },
     
     buildSliderValues : function() {
-        if(!this.timeManager.units && !this.timeManager.snapToIntervals){
+        var mngr = this.timeManager;
+        if(!mngr.step && !mngr.snapToList){
             //timeManager is essentially empty if both of these are false/null
             return false;
         }
         else{
             var indexMap = ['primary'], 
-                values = [this.timeManager.currentTime.getTime()], 
-                min = this.timeManager.range[0].getTime(), 
-                max = this.timeManager.range[1].getTime(), 
-                then = new Date(min), 
-                interval;
-            
-            if(this.timeManager.units) {
-                var step = parseFloat(then['getUTC' + this.timeManager.units]()) + parseFloat(this.timeManager.step);
-                var stepTime = then['setUTC' + this.timeManager.units](step);
-                interval = stepTime - min;
-            }
-            else {
+                values = [mngr.currentValue],
+                min = mngr.animationRange[0],
+                max = mngr.animationRange[1],
                 interval = false;
-            }
+
             if(this.dynamicRange) {
                 var rangeAdj = (min - max) * 0.1;
                 values.push( min = min - rangeAdj, max = max + rangeAdj);
                 indexMap[1] = 'minTime';
                 indexMap[2] = 'maxTime';
             }
-            if(this.playbackMode && this.playbackMode != 'track') {
+            if(this.playbackMode != 'track') {
                 values.push(min);
                 indexMap[indexMap.length] = 'tail';
             }
-            //set slider interval based on the interval steps if not determined yet
-            if(!interval && this.timeManager.intervals && this.timeManager.intervals.length>2){
-                interval = Math.round((max-min)/this.timeManager.intervals.length);
+            //set slider interval based on the step value
+            if(!mngr.snapToList){
+                // OpenLayers.Control.DimensionManger.step should
+                // always be a real numeric value, even if timeUnits & timeStep are set
+                interval = mngr.step;
             }
 
             return {
@@ -256,8 +271,8 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
             }
         }
         //set format of slider based on the interval steps
-        if(!sliderInfo.interval && slider.timeManager.intervals && slider.timeManager.intervals.length > 2) {
-            sliderInfo.interval = Math.round((sliderInfo.maxValue - sliderInfo.minValue) / this.timeManager.intervals.length);
+        if(!sliderInfo.interval && slider.timeManager.modelCache.values) {
+            sliderInfo.interval = Math.round((sliderInfo.maxValue - sliderInfo.minValue) / this.timeManager.modelCache.values.length);
         }
         this.setTimeFormat(gxp.PlaybackToolbar.guessTimeFormat(sliderInfo.interval));
     },
@@ -288,8 +303,17 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
         }
     },
 
+    onClickChange : function(local) {
+        this._click = true;
+        gxp.slider.TimeSlider.superclass.onClickChange.apply(this, arguments);
+    },
+
     onSliderChangeComplete: function(slider, value, thumb, silent){
-        var slideTime = new Date(value);
+        if (this._click !== true) {
+            return;
+        } else {
+            delete this._click;
+        }
         var timeManager = slider.timeManager;
         //test if this is the main time slider
         switch (slider.indexMap[thumb.index]) {
@@ -299,72 +323,67 @@ gxp.slider.TimeSlider = Ext.extend(Ext.slider.MultiSlider, {
                 if (tailIndex>-1){
                     slider.onSliderChangeComplete(slider,slider.thumbs[tailIndex].value,slider.thumbs[tailIndex],true);
                 }
-                if (!timeManager.snapToIntervals && timeManager.units) {
-                    timeManager.setTime(slideTime);
-                }
-                else if (timeManager.snapToIntervals && timeManager.intervals.length) {
-                    var targetIndex=0;
-                    Ext.each(timeManager.intervals,function(date, index, intervals){
-                        if(date.getTime() == value){
-                            targetIndex = index;
-                            //stop processing
-                            return false;
-                        }
-                        else{
-                            var diffPrev = value - intervals[targetIndex].getTime();
-                            var diffCurr = date.getTime() - value;
-                            if(diffPrev<diffCurr){
-                                //targetIndex is at the right place, stop
-                                return false;
+                if (!timeManager.snapToList && timeManager.timeUnits) {
+                    //this will make the value actually be modified by the exact time unit
+                    var op = value > timeManager.currentValue ? 'ceil' : 'floor';
+                    var steps = Math[op]((value-timeManager.currentValue)/OpenLayers.TimeStep[timeManager.timeUnits]);
+                    timeManager.setCurrentValue(timeManager.incrementTimeValue(steps));
                             } else {
-                                targetIndex = index;
-                            }
-                        }
-                    });
-                    timeManager.setTime(timeManager.intervals[targetIndex]);
+                    timeManager.setCurrentValue(value);
                 }
                 break;
             case 'min':
-                if (value >= timeManager.intialRange[0].getTime()) {
-                    timeManager.setStart(new Date(value));
-                }
+                    timeManager.setAnimationStart(value);
                 break;
             case 'max':
-                if (value <= timeManager.intialRange[1].getTime()) {
-                    timeManager.setEnd(new Date(value));
-                }
+                    timeManager.seAnimantionEnd(value);
                 break;
             case 'tail':
-                var adj = 1;
-                //Purposely falling through from control units down to seconds to avoid repeating the conversion factors
-                switch (timeManager.units) {
-                    case OpenLayers.TimeUnit.YEARS:
-                        adj *= 12;
-                    case OpenLayers.TimeUnit.MONTHS:
-                        adj *= (365 / 12);
-                    case OpenLayers.TimeUnit.DAYS:
-                        adj *= 24;
-                    case OpenLayers.TimeUnit.HOURS:
-                        adj *= 60;
-                    case OpenLayers.TimeUnit.MINUTES:
-                        adj *= 60;
-                    case OpenLayers.TimeUnit.SECONDS:
-                        adj *= 1000;
-                        break;
-                }
-                for (var i = 0, len = timeManager.timeAgents.length; i < len; i++) {
-                    if(timeManager.timeAgents[i].rangeMode == 'range'){
-                        timeManager.timeAgents[i].rangeInterval = (slider.thumbs[0].value - value) / adj;    
+                for (var i = 0, len = timeManager.agents.length; i < len; i++) {
+                    if(timeManager.agents[i].tickMode == 'range'){
+                        timeManager.agents[i].rangeInterval = (slider.thumbs[0].value - value);
                     }
                 }
                 if(!silent){
-                    timeManager.setTime(new Date(slider.thumbs[0].value));
+                    timeManager.setCurrentValue(slider.thumbs[0].value);
                 }
         }
         if (this._restartPlayback) {
             delete this._restartPlayback;
             timeManager.play();
         }
+    },
+
+    // override to add pre buffer progress
+    onRender : function() {
+        this.autoEl = {
+            cls: 'x-slider ' + (this.vertical ? 'x-slider-vert' : 'x-slider-horz'),
+            cn : [{
+                cls: 'x-slider-end',
+                cn : {
+                    cls:'x-slider-inner',
+                    cn : [{tag:'a', cls:'x-slider-focus', href:"#", tabIndex: '-1', hidefocus:'on'}]
+                }
+            }, {cls: 'x-slider-progress'}]
+        };
+
+        Ext.slider.MultiSlider.superclass.onRender.apply(this, arguments);
+
+        this.endEl   = this.el.first();
+        this.progressEl = this.el.child('.x-slider-progress');
+        this.innerEl = this.endEl.first();
+        this.focusEl = this.innerEl.child('.x-slider-focus');
+
+        //render each thumb
+        for (var i=0; i < this.thumbs.length; i++) {
+            this.thumbs[i].render();
+        }
+
+        //calculate the size of half a thumb
+        var thumb      = this.innerEl.child('.x-slider-thumb');
+        this.halfThumb = (this.vertical ? thumb.getHeight() : thumb.getWidth()) / 2;
+
+        this.initEvents();
     }
 
 });

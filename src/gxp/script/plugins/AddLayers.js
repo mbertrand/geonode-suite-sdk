@@ -9,6 +9,9 @@
 /**
  * @requires plugins/Tool.js
  * @requires widgets/NewSourceDialog.js
+ * @requires widgets/FeedSourceDialog.js
+ * @requires plugins/GeoNodeCatalogueSource.js
+ * @requires widgets/CatalogueSearchPanel.js
  */
 
 /** api: (define)
@@ -43,6 +46,12 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      *  Text for find menu item (i18n).
      */
     findActionMenuText: "Find layers",
+
+    /** api: config[addActionMenuText]
+     *  ``String``
+     *  Text for add feed menu item (i18n).
+     */
+    addFeedActionMenuText: "Add feeds",
 
     /** api: config[addActionTip]
      *  ``String``
@@ -85,19 +94,25 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      */
     availableLayersText: "Available Layers",
 
-    /** api: config[availableLayersText]
+    /** api: config[searchText]
+     *  ``String``
+     *  Text for the search dialog title (i18n).
+     */
+    searchText: "Search for layers",
+
+    /** api: config[expanderTemplateText]
      *  ``String``
      *  Text for the grid expander (i18n).
      */
     expanderTemplateText: "<p><b>Abstract:</b> {abstract}</p>",
     
-    /** api: config[availableLayersText]
+    /** api: config[panelTitleText]
      *  ``String``
      *  Text for the layer title (i18n).
      */
     panelTitleText: "Title",
 
-    /** api: config[availableLayersText]
+    /** api: config[layerSelectionText]
      *  ``String``
      *  Text for the layer selection (i18n).
      */
@@ -120,6 +135,13 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      *  If provided, a :class:`gxp.CatalogueSearchPanel` will be added as a
      *  menu option. This panel will be constructed using the provided config.
      *  By default, no search functionality is provided.
+     */
+
+    /** api: config[feeds]
+     *  ``Object | Boolean``
+     *  If provided, a :class:`gxp.FeedSourceDialog` will be added as a
+     *  menu option. This panel will be constructed using the provided config.
+     *  By default, no feed functionality is provided.
      */
 
     /** api: config[upload]
@@ -205,6 +227,9 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      */
     addServerId: null,
 
+    layerTree: null,
+    
+    
     /** private: method[constructor]
      */
     constructor: function(config) {
@@ -221,7 +246,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         );
         gxp.plugins.AddLayers.superclass.constructor.apply(this, arguments);        
     },
-    
+
     /** api: method[addActions]
      */
     addActions: function() {
@@ -245,6 +270,14 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     iconCls: 'gxp-icon-addlayers', 
                     text: this.findActionMenuText,
                     handler: this.showCatalogueSearch,
+                    scope: this
+                }));
+            }
+            if (this.initialConfig.feeds) {
+                items.push(new Ext.menu.Item({
+                    iconCls: 'gxp-icon-addlayers',
+                    text: this.addFeedActionMenuText,
+                    handler: this.showFeedDialog,
                     scope: this
                 }));
             }
@@ -302,6 +335,9 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         }
         var output = gxp.plugins.AddLayers.superclass.addOutput.apply(this, [{
             sources: sources,
+            title: this.searchText,
+            height: 300,
+            width: 315,
             selectedSource: selectedSource,
             xtype: 'gxp_cataloguesearchpanel',
             map: this.target.mapPanel.map,
@@ -313,9 +349,18 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     var bbox = bounds.transform(layerConfig.srs, mapProjection);
                     layerConfig.srs = mapProjection;
                     layerConfig.bbox = bbox.toArray();
-                    layerConfig.source = this.catalogSourceKey || sourceKey;
+                    layerConfig.source = this.initialConfig.catalogSourceKey !== null ? 
+                        this.initialConfig.catalogSourceKey : sourceKey;
                     var record = source.createLayerRecord(layerConfig);
+                    record.set("group", layerConfig.subject);
+                    if (this.layerTree) {
+                        this.layerTree.addCategoryFolder({"group":layerConfig.subject});
+                    }
+
                     this.target.mapPanel.layers.add(record);
+                    if (bbox) {
+                        this.target.mapPanel.map.zoomToExtent(bbox);
+                    }
                 },
                 scope: this
             }
@@ -337,6 +382,45 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         this.capGrid.show();
     },
 
+    /** api: method[showFeedDialog]
+     * Shows the window with a dialog for adding feeds.
+     */
+    showFeedDialog: function() {
+        if(!this.feedDialog) {
+            var Cls = this.outputTarget ? Ext.Panel : Ext.Window;
+            this.feedDialog = new Cls(Ext.apply({
+                closeAction: "hide",
+                autoScroll: true,
+                title: this.addFeedActionMenuText,
+                items: [{
+                    xtype: "gxp_feedsourcedialog",
+                    target: this.target,
+                    listeners: {
+                        'addfeed':function (ptype, config) {
+                            var sourceConfig = {"config":{"ptype":ptype}};
+                            if (config.url) {
+                                sourceConfig.config["url"] = config.url;
+                            }
+                            var source = this.target.addLayerSource(sourceConfig);
+                            config.source = source.id;
+                            var feedRecord = source.createLayerRecord(config);
+                            this.target.mapPanel.layers.add([feedRecord]);
+                            this.feedDialog.hide();
+                        },
+                        scope: this
+                    }
+                }]
+            }, this.initialConfig.outputConfig));
+            if (Cls === Ext.Panel) {
+                this.addOutput(this.feedDialog);
+            }
+        }
+        if (!(this.feedDialog instanceof Ext.Window)) {
+            this.addOutput(this.feedDialog);
+        }
+        this.feedDialog.show();
+    },
+
     /**
      * private: method[initCapGrid]
      * Constructs a window with a capabilities grid.
@@ -355,7 +439,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         });
 
         var expander = this.createExpander();
-        
+
         function addLayers() {
             var source = this.selectedSource;
             var records = capGridPanel.getSelectionModel().getSelections();
@@ -380,7 +464,27 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                 }
             }
         }
-        
+
+        function urlSelected(url) {
+            me.target.addLayerSource({
+                config: {url: url, ptype: me.target.layerSources[id].ptype}, // assumes default of gx_wmssource
+                callback: function(id) {
+                    // add to combo and select
+                    var record = new sources.recordType({
+                        id: id,
+                        title: me.target.layerSources[id].title || me.untitledText
+                    });
+                    sources.insert(0, [record]);
+                    sourceComboBox.onSelect(record, 0);
+                },
+                fallback: function(source, msg) {
+                    error = new Ext.Template(me.addLayerSourceErrorText).apply({msg: msg});
+                    sourceComboBox.validate();
+                },
+                scope: me
+            });
+        }
+
         var idx = 0;
         if (this.startSourceId !== null) {
             sources.each(function(record) {
@@ -451,7 +555,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                 scope: this
             }
         });
-        
+
         var capGridToolbar = null;
         if (this.target.proxy || data.length > 1) {
             capGridToolbar = [
@@ -536,7 +640,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                 html: this.instructionsText
             });
         }
-        
+
         var bbarItems = [
             "->",
             new Ext.Button({
@@ -553,7 +657,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                 scope: this
             })
         ];
-        
+
         var uploadButton;
         if (!this.uploadSource) {
             uploadButton = this.createUploadButton();
@@ -622,6 +726,9 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     // at position 1.
                     layerStore.insert(1, [record]);
                 } else {
+                    if (this.layerTree) {
+                        this.layerTree.createCategoryFolder({"title":record.get("group")});
+                    }
                     layerStore.add([record]);
                 }
             }
@@ -644,7 +751,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             }
         }
     },
-    
+
     /** private: method[setSelectedSource]
      *  :arg source: :class:`gxp.plugins.LayerSource`
      */
@@ -659,7 +766,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     valueField = sourceComboBox.valueField,
                     index = store.findExact(valueField, sourceComboBox.getValue()),
                     rec = store.getAt(index),
-                    source = this.target.layerSources[rec.get("id")];
+                    source = rec && this.target.layerSources[rec.get("id")];
                 if (source) {
                     if (source.title !== rec.get("title") && !Ext.isEmpty(source.title)) {
                         rec.set("title", source.title);
@@ -671,7 +778,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
             }).createDelegate(this)});
         }
     },
-    
+
     /** api: method[createUploadButton]
      *  :arg Cls: ``Function`` The class to use for creating the button. If not
      *      provided, an ``Ext.Button`` instance will be created.
@@ -740,7 +847,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                                                 }
                                             });
                                             if (gridPanel) {
-                                                // this needs to be deferred because the 
+                                                // this needs to be deferred because the
                                                 // grid view has not refreshed yet
                                                 window.setTimeout(function() {
                                                     sel.selectRecords(newRecords);
@@ -761,7 +868,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                                 scope: this
                             }
                         }, uploadConfig));
-                    
+
                         var win;
                         if (this.outputTarget) {
                             this.addOutput(panel);
@@ -778,7 +885,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                 },
                 scope: this
             });
-            
+
             var urlCache = {};
             function getStatus(url, callback, scope) {
                 if (url in urlCache) {
@@ -798,7 +905,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     });
                 }
             }
-            
+
             this.on({
                 sourceselected: function(tool, source) {
                     button[this.uploadSource ? "show" : "hide"]();
@@ -819,11 +926,11 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         }
         return button;
     },
-    
+
     /** private: method[getGeoServerRestUrl]
      *  :arg url: ``String`` A GeoServer url like "geoserver/ows"
      *  :returns: ``String`` The rest endpoint for the above GeoServer,
-     *      i.e. "geoserver/rest" 
+     *      i.e. "geoserver/rest"
      */
     getGeoServerRestUrl: function(url) {
         var parts = url.split("/");
@@ -831,7 +938,7 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
         parts.push("rest");
         return parts.join("/");
     },
-    
+
     /** private: method[isEligibleForUpload]
      *  :arg source: :class:`gxp.plugins.LayerSource`
      *  :returns: ``Boolean``

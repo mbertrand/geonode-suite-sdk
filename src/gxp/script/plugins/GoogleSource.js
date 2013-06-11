@@ -30,7 +30,7 @@ Ext.namespace("gxp.plugins");
  *
  *    Available layer names for this source are "ROADMAP", "SATELLITE",
  *    "HYBRID" and "TERRAIN"
- */   
+ */
 /** api: example
  *  The configuration in the ``sources`` property of the :class:`gxp.Viewer` is
  *  straightforward:
@@ -53,10 +53,10 @@ Ext.namespace("gxp.plugins");
  *
  */
 gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
-    
+
     /** api: ptype = gxp_googlesource */
     ptype: "gxp_googlesource",
-    
+
     /** config: config[timeout]
      *  ``Number``
      *  The time (in milliseconds) to wait before giving up on the Google Maps
@@ -69,7 +69,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
      *  ``GeoExt.data.LayerStore`` containing records with "ROADMAP",
      *  "SATELLITE", "HYBRID" and "TERRAIN" name fields.
      */
-    
+
     /** api: config[title]
      *  ``String``
      *  A descriptive title for this layer source (i18n).
@@ -111,7 +111,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
         this.config = config;
         gxp.plugins.GoogleSource.superclass.constructor.apply(this, arguments);
     },
-    
+
     /** api: method[createStore]
      *
      *  Creates a store of layer records.  Fires "ready" when store is loaded.
@@ -124,7 +124,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
             errback: function() {
                 delete this.store;
                 this.fireEvent(
-                    "failure", 
+                    "failure",
                     this,
                     "The Google Maps script failed to load within the provided timeout (" + (this.timeout / 1000) + " s)."
                 );
@@ -132,7 +132,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
             scope: this
         });
     },
-    
+
     /** private: method[syncCreateStore]
      *
      *  Creates a store of layers.  This requires that the API script has already
@@ -151,7 +151,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
             "HYBRID": {"abstract": this.hybridAbstract},
             "TERRAIN": {"abstract": this.terrainAbstract, MAX_ZOOM_LEVEL: 15}
         };
-        
+
         var layers = [];
         var name, mapType;
         for (name in mapTypes) {
@@ -185,7 +185,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
         });
         this.fireEvent("ready", this);
     },
-    
+
     /** api: method[createLayerRecord]
      *  :arg config:  ``Object``  The application config for this layer.
      *  :returns: ``GeoExt.data.LayerRecord``
@@ -217,7 +217,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
             if ("visibility" in config) {
                 layer.visibility = config.visibility;
             }
-            
+
             record.set("selected", config.selected || false);
             record.set("source", config.source);
             record.set("name", config.name);
@@ -228,7 +228,7 @@ gxp.plugins.GoogleSource = Ext.extend(gxp.plugins.LayerSource, {
         }
         return record;
     }
-    
+
 });
 
 /**
@@ -247,7 +247,7 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
      *  The resources for this plugin type are loading.
      */
     loading: false,
-    
+
     constructor: function() {
         this.addEvents(
             /** private: event[ready]
@@ -262,7 +262,7 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
         );
         return Ext.util.Observable.prototype.constructor.apply(this, arguments);
     },
-    
+
     /** private: method[onScriptLoad]
      *  Called when all resources required by this plugin type have loaded.
      */
@@ -275,7 +275,7 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
             monitor.fireEvent("ready");
         }
     },
-    
+
     /** api: method[gxp.plugins.GoogleSource.loader.onLoad]
      *  :arg options: ``Object``
      *
@@ -291,7 +291,7 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
         if (this.ready) {
             // call this in the next turn for consistent return before callback
             window.setTimeout(function() {
-                options.callback.call(options.scope);                
+                options.callback.call(options.scope);
             }, 0);
         } else if (!this.loading) {
             this.loadScript(options);
@@ -313,14 +313,14 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
             autoload: Ext.encode({
                 modules: [{
                     name: "maps",
-                    version: 3.3,
+                    version: 3.7,
                     nocss: "true",
                     callback: "gxp.plugins.GoogleSource.loader.onScriptLoad",
                     other_params: options.otherParams
                 }]
             })
         };
-        
+
         var script = document.createElement("script");
         script.src = "http://www.google.com/jsapi?" + Ext.urlEncode(params);
 
@@ -337,7 +337,7 @@ gxp.plugins.GoogleSource.loader = new (Ext.extend(Ext.util.Observable, {
                 this.purgeListeners();
             }
         }).createDelegate(this), timeout);
-        
+
         // register callback for ready
         this.on({
             ready: options.callback,

@@ -102,6 +102,10 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
      */
     openInNewWindow: false,
 
+    iconCls: "gxp-icon-print",
+
+    text: null,
+
     /** private: method[constructor]
      */
     constructor: function(config) {
@@ -181,7 +185,8 @@ gxp.plugins.Print = Ext.extend(gxp.plugins.Tool, {
                 menuText: this.menuText,
                 buttonText: this.buttonText,
                 tooltip: this.tooltip,
-                iconCls: "gxp-icon-print",
+                iconCls: this.iconCls,
+                text: this.text,
                 disabled: this.printCapabilities !== null ? false : true,
                 handler: function() {
                     var supported = getPrintableLayers();

@@ -81,6 +81,8 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
     menuText: "3D Viewer",
     tooltip: "Switch to 3D Viewer",
     tooltipMap: "Switch back to normal map view",
+    iconCls: "gxp-icon-googleearth",
+    text: null,
 
     /** private: method[constructor]
      */
@@ -94,7 +96,8 @@ gxp.plugins.GoogleEarth = Ext.extend(gxp.plugins.Tool, {
         var actions = [{
             menuText: this.menuText,
             enableToggle: true,
-            iconCls: "gxp-icon-googleearth",
+            iconCls: this.iconCls,
+            text: this.text,
             tooltip: this.tooltip,
             toggleHandler: function(button, state) {
                 // we unpress the button so that it will only show pressed

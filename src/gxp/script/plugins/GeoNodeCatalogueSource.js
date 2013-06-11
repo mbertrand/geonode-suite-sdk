@@ -62,10 +62,10 @@ gxp.plugins.GeoNodeCatalogueSource = Ext.extend(gxp.plugins.CatalogueSource, {
                 top: v.maxy
             };
         }},
-        {name: "URI", mapping: "download_links", convert: function(v) {
+        {name: "URI", mapping: "links", convert: function(v) {
             var result = [];
-            for (var i=0,ii=v.length;i<ii;++i) {
-                result.push(v[i][3]);
+            for (var key in v) {
+                result.push({value: v[key].url});
             }
             return result;
         }}
@@ -118,11 +118,15 @@ gxp.plugins.GeoNodeCatalogueSource = Ext.extend(gxp.plugins.CatalogueSource, {
      */
     filter: function(options) {
         var bbox = undefined;
-        for (var i=0, ii=options.filters.length; i<ii; ++i) {
-            var f = options.filters[i];
-            if (f instanceof OpenLayers.Filter.Spatial) {
-                bbox = f.value.toBBOX();
-                break;
+
+        // check for the filters property before using it
+        if (options.filters !== undefined) {
+            for (var i=0, ii=options.filters.length; i<ii; ++i) {
+                var f = options.filters[i];
+                if (f instanceof OpenLayers.Filter.Spatial) {
+                    bbox = f.value.toBBOX();
+                    break;
+                }
             }
         }
         Ext.apply(this.store.baseParams, {
@@ -137,6 +141,12 @@ gxp.plugins.GeoNodeCatalogueSource = Ext.extend(gxp.plugins.CatalogueSource, {
             delete this.store.baseParams.bbox;
         }
         this.store.load();
+    },
+
+    createLayerRecord: function(layerConfig) {
+        layerConfig.restUrl = this.restUrl;
+        layerConfig.queryable = true;
+        return gxp.plugins.GeoNodeCatalogueSource.superclass.createLayerRecord.apply(this, arguments);
     }
 
 });

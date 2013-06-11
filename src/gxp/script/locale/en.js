@@ -18,9 +18,12 @@ GeoExt.Lang.add("en", {
         availableLayersText: "Available Layers",
         expanderTemplateText: "<p><b>Abstract:</b> {abstract}</p>",
         panelTitleText: "Title",
-        layerSelectionText: "View available data from:",
+        layerSelectionText: "Source:",
+        sourceSelectOrTypeText: "Choose one or type service URL",
         doneText: "Done",
-        uploadText: "Upload layers"
+        uploadText: "Upload layers",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -35,7 +38,9 @@ GeoExt.Lang.add("en", {
         createFeatureActionText: "Create",
         editFeatureActionText: "Modify",
         createFeatureActionTip: "Create a new feature",
-        editFeatureActionTip: "Edit existing feature"
+        editFeatureActionTip: "Edit existing feature",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -71,6 +76,10 @@ GeoExt.Lang.add("en", {
         rootNodeText: "Layers",
         overlayNodeText: "Overlays",
         baseNodeText: "Base Layers"
+    },
+
+    "gxp.plugins.LayerManager.prototype": {
+        baseNodeText: "Base Maps"
     },
 
     "gxp.plugins.Legend.prototype": {
@@ -240,20 +249,7 @@ GeoExt.Lang.add("en", {
         expanderTemplateText: "<p><b>Abstract:</b> {abstract}</p>"
     },
     
-    "gxp.PointSymbolizer.prototype": {
-        graphicCircleText: "circle",
-        graphicSquareText: "square",
-        graphicTriangleText: "triangle",
-        graphicStarText: "star",
-        graphicCrossText: "cross",
-        graphicXText: "x",
-        graphicExternalText: "external",
-        urlText: "URL",
-        opacityText: "opacity",
-        symbolText: "Symbol",
-        sizeText: "Size",
-        rotationText: "Rotation"
-    },
+
 
     "gxp.QueryPanel.prototype": {
         queryByLocationText: "Query by location",
@@ -273,7 +269,22 @@ GeoExt.Lang.add("en", {
         symbolText: "Symbol",
         nameText: "Name"
     },
-    
+
+    "gxp.PointSymbolizer.prototype": {
+        graphicCircleText: "circle",
+        graphicSquareText: "square",
+        graphicTriangleText: "triangle",
+        graphicStarText: "star",
+        graphicCrossText: "cross",
+        graphicXText: "x",
+        graphicExternalText: "external",
+        urlText: "URL",
+        opacityText: "opacity",
+        symbolText: "Symbol",
+        sizeText: "Size",
+        rotationText: "Rotation"
+    },
+
     "gxp.ScaleLimitPanel.prototype": {
         scaleSliderTemplate: "{scaleType} Scale 1:{scale}",
         minScaleLimitText: "Min scale limit",
@@ -317,7 +328,17 @@ GeoExt.Lang.add("en", {
         cacheFieldText: "Use cached version",
         stylesText: "Available Styles",
         infoFormatText: "Info format",
-        infoFormatEmptyText: "Select a format"
+        infoFormatEmptyText: "Select a format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -366,6 +387,8 @@ GeoExt.Lang.add("en", {
         fileLabel: "Data",
         fieldEmptyText: "Browse for data archive...",
         uploadText: "Upload",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Uploading your data...",
         invalidFileExtensionText: "File extension must be one of: ",
         optionsText: "Options",
@@ -386,6 +409,23 @@ GeoExt.Lang.add("en", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Zoom level"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Trouble saving: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Source",
+        addPicasaText: "Picasa Photos",
+        addYouTubeText: "YouTube Videos",
+        addRSSText: "Other GeoRSS Feed",
+        addFeedText: "Add to Map",
+        addTitleText: "Title",
+        keywordText: "Keyword",
+        doneText: "Done",
+        titleText: "Add Feeds",
+        maxResultsText: "Max Items"
     }
 
 });

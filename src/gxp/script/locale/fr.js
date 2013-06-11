@@ -12,7 +12,9 @@ GeoExt.Lang.add("fr", {
         addLayerSourceErrorText: "Impossible d'obtenir les capacités WMS ({msg}).\nVeuillez vérifier l'URL et essayez à nouveau.",
         availableLayersText: "Couches disponibles",
         doneText: "Terminé",
-        uploadText: "Télécharger des données"
+        uploadText: "Télécharger des données",
+        addFeedActionMenuText: "Add feeds",
+        searchText: "Search for layers"
     },
     
     "gxp.plugins.BingSource.prototype": {
@@ -27,7 +29,9 @@ GeoExt.Lang.add("fr", {
         createFeatureActionText: "Create",
         editFeatureActionText: "Modify",
         createFeatureActionTip: "Créer un nouvel objet",
-        editFeatureActionTip: "Modifier un objet existant"
+        editFeatureActionTip: "Modifier un objet existant",
+        commitTitle: "Commit message",
+        commitText: "Please enter a commit message for this edit:"
     },
     
     "gxp.plugins.FeatureGrid.prototype": {
@@ -282,7 +286,17 @@ GeoExt.Lang.add("fr", {
         cacheFieldText: "Utiliser la version mise en cache",
         stylesText: "Available styles",
         infoFormatText: "Info format",
-        infoFormatEmptyText: "Choisissez un format"
+        infoFormatEmptyText: "Choisissez un format",
+        displayOptionsText: "Display options",
+        queryText: "Limit with filters",
+        scaleText: "Limit by scale",
+        minScaleText: "Min scale",
+        maxScaleText: "Max scale",
+        switchToFilterBuilderText: "Switch back to filter builder",
+        cqlPrefixText: "or ",
+        cqlText: "use CQL filter instead",
+        singleTileText: "Single tile",
+        singleTileFieldText: "Use a single tile"
     },
 
     "gxp.EmbedMapDialog.prototype": {
@@ -304,6 +318,8 @@ GeoExt.Lang.add("fr", {
         fileLabel: "Données",
         fieldEmptyText: "Parcourir pour ...",
         uploadText: "Upload",
+        uploadFailedText: "Upload failed",
+        processingUploadText: "Processing upload...",
         waitMsgText: "Transfert de vos données ...",
         invalidFileExtensionText: "L'extension du fichier doit être : ",
         optionsText: "Options",
@@ -324,6 +340,23 @@ GeoExt.Lang.add("fr", {
 
     "gxp.ScaleOverlay.prototype": { 
         zoomLevelText: "Niveau de zoom"
+    },
+
+    "gxp.Viewer.prototype": {
+        saveErrorText: "Sauver Trouble: "
+    },
+
+    "gxp.FeedSourceDialog.prototype": {
+        feedTypeText: "Source",
+        addPicasaText: "Picasa Photos",
+        addYouTubeText: "YouTube Vidéos",
+        addRSSText: "GeoRSS Autre",
+        addFeedText: "Ajouter à la carte",
+        addTitleText: "Titre",
+        keywordText: "Mot-clé",
+        doneText: "Terminé",
+        titletext:  "Ajouter RSS",
+        maxResultsText: "Articles Max"
     }
 
 });

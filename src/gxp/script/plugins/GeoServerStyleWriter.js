@@ -24,7 +24,7 @@ Ext.namespace("gxp.plugins");
 
 /** api: constructor
  *  .. class:: GeoServerStyleWriter(config)
- *   
+ *
  *      Save styles from :class:`gxp.WMSStylesDialog` or similar classes that
  *      have a ``layerRecord`` and a ``stylesStore`` with a ``userStyle``
  *      field. The plugin provides a save method, which will use the GeoServer
@@ -33,28 +33,28 @@ Ext.namespace("gxp.plugins");
  *      ``layerRecord``.
  */
 gxp.plugins.GeoServerStyleWriter = Ext.extend(gxp.plugins.StyleWriter, {
-    
+
     /** api: config[baseUrl]
      *  ``String``
      *  The base url for the GeoServer REST API. Default is "/geoserver/rest".
      */
     baseUrl: "/geoserver/rest",
-    
+
     /** private: method[constructor]
      */
     constructor: function(config) {
         this.initialConfig = config;
         Ext.apply(this, config);
-        
+
         gxp.plugins.GeoServerStyleWriter.superclass.constructor.apply(this, arguments);
     },
-    
+
     /** api: method[write]
      *  :arg options: ``Object``
      *
      *  Saves the styles of the target's ``layerRecord`` using GeoServer's
      *  RESTconfig API.
-     *  
+     *
      *  Supported options:
      *
      *  * defaultStyle - ``String`` If set, the default style will be set.
@@ -96,13 +96,13 @@ gxp.plugins.GeoServerStyleWriter = Ext.extend(gxp.plugins.StyleWriter, {
             this.assignStyles(options.defaultStyle, success);
         }
     },
-    
-    /** private: method[writeStyle] 
+
+    /** private: method[writeStyle]
      *  :arg styleRec: ``Ext.data.Record`` the record from the target's
      *      ``stylesStore`` to write
      *  :arg dispatchQueue: ``Array(Function)`` the dispatch queue the write
      *      function is added to.
-     * 
+     *
      *  This method does not actually write styles, it just adds a function to
      *  the provided ``dispatchQueue`` that will do so.
      */
@@ -185,11 +185,25 @@ gxp.plugins.GeoServerStyleWriter = Ext.extend(gxp.plugins.StyleWriter, {
             scope: this
         });
     },
-    
+
     /** private: method[deleteStyles]
      *  Deletes styles that are no longer assigned to the layer.
      */
     deleteStyles: function() {
+
+        //Get rid of layers in deleteStyles that are also in the main datastore
+        //How did they get there in the first place? Don't know yet.
+        var store = this.target.stylesStore;
+        var deletedStyles = this.deletedStyles;
+        store.each(function(rec) {
+            delRec = deletedStyles.indexOf(rec.data.name);
+            if (delRec > -1)
+            {
+                deletedStyles.splice(delRec,1);
+            }
+        });
+
+
         for (var i=0, len=this.deletedStyles.length; i<len; ++i) {
             Ext.Ajax.request({
                 method: "DELETE",

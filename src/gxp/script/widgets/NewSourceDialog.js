@@ -38,7 +38,19 @@ gxp.NewSourceDialog = Ext.extend(Ext.Panel, {
      *  ``String``
      *  Text for add server button (i18n).
      */
-    addServerText: "Add Server",
+    addServerText: "Add WMS Server",
+
+    /** api: config[wmsText]
+     *  ``String``
+     *  Text for WMS radio-button(i18n).
+     */
+    addWMSText: "WMS",
+
+    /** api: config[arcText]
+     *  ``String``
+     *  Text for ArcGIS REST radio-button(i18n).
+     */
+    addArcText: "ArcGIS REST",
     
     /** api: config[invalidURLText]
      *  ``String``
@@ -92,7 +104,8 @@ gxp.NewSourceDialog = Ext.extend(Ext.Panel, {
 
         this.form = new Ext.form.FormPanel({
             items: [
-                this.urlTextField
+                this.urlTextField,
+                this.sourceTypeRadioList
             ],
             border: false,
             labelWidth: 30,
@@ -143,7 +156,8 @@ gxp.NewSourceDialog = Ext.extend(Ext.Panel, {
             };
 
             // this.explorer.addSource(url, null, success, failure, this);
-            this.addSource(url, this.hide, failure, this);
+            //this.addSource(url, this.hide, failure, this);
+            this.addSource(url, sourceType, this.hide, failure, this);
         }, this);
 
     },

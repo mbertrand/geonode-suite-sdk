@@ -24,12 +24,12 @@ Ext.namespace("gxp");
 
 /** api: constructor
  *  .. class:: WMSLayerPanel(config)
- *   
+ *
  *      Create a dialog for setting WMS layer properties like title, abstract,
  *      opacity, transparency and image format.
  */
 gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
-    
+
     /** api: config[layerRecord]
      *  ``GeoExt.data.LayerRecord``
      *  Show properties for this layer record.
@@ -42,18 +42,18 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
      *  will be ignored.
      */
     source: null,
-    
+
     /** api: config[styling]
      *  ``Boolean``
      *  Show a "Styles" tab. Default is true.
      */
     styling: true,
-    
+
     /** api: config[sameOriginStyling]
      *  ``Boolean``
      *  Only allow editing of styles for layers whose sources have a URL that
-     *  matches the origin of this application.  It is strongly discouraged to 
-     *  do styling through the proxy as all authorization headers and cookies 
+     *  matches the origin of this application.  It is strongly discouraged to
+     *  do styling through the proxy as all authorization headers and cookies
      *  are shared with all remotesources.  Default is ``true``.
      */
     sameOriginStyling: true,
@@ -71,32 +71,32 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
      *  the checkbox to disabled and unchecked).
      */
     transparent: null,
-    
+
     /** private: property[editableStyles]
      *  ``Boolean``
      */
     editableStyles: false,
-    
+
     /** api: config[activeTab]
      *  ``String or Number``
      *  A string id or the numeric index of the tab that should be initially
      *  activated on render.  Defaults to ``0``.
      */
     activeTab: 0,
-    
+
     /** api: config[border]
      *  ``Boolean``
      *  Display a border around the panel.  Defaults to ``false``.
      */
     border: false,
-    
+
     /** api: config[imageFormats]
      *  ``RegEx`` Regular expression used to test browser friendly formats for
      *  GetMap requests.  The formats displayed will those from the record that
      *  match this expression.  Default is ``/png|gif|jpe?g/i``.
      */
     imageFormats: /png|gif|jpe?g/i,
-    
+
     /** i18n */
     aboutText: "About",
     titleText: "Title",
@@ -119,6 +119,8 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
     switchToFilterBuilderText: "Switch back to filter builder",
     cqlPrefixText: "or ",
     cqlText: "use CQL filter instead",
+    singleTileText: "Single tile",
+    singleTileFieldText: "Use a single tile",
 
     initComponent: function() {
         this.cqlFormat = new OpenLayers.Format.CQL();
@@ -414,7 +416,7 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                                 layer.mergeNewParams({
                                     transparent: checked ? "true" : "false"
                                 });
-                                 this.fireEvent("change");
+                                this.fireEvent("change");
                             },
                             scope: this
                         }
@@ -422,6 +424,25 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                         xtype: "label",
                         cls: "gxp-layerproperties-label",
                         text: this.transparentText
+                    }]
+                }, {
+                    xtype: "compositefield",
+                    fieldLabel: this.singleTileText,
+                    anchor: "99%",
+                    items: [{
+                        xtype: "checkbox",
+                        checked: this.layerRecord.get("layer").singleTile,
+                        listeners: {
+                            check: function(checkbox, checked) {
+                                layer.addOptions({singleTile: checked});
+                                this.fireEvent("change");
+                            },
+                            scope: this
+                        }
+                    }, {
+                        xtype: "label",
+                        cls: "gxp-layerproperties-label",
+                        text: this.singleTileFieldText
                     }]
                 }, {
                     xtype: "compositefield",
@@ -572,8 +593,8 @@ gxp.WMSLayerPanel = Ext.extend(Ext.TabPanel, {
                 }]
             }]
         };
-    }    
+    }
 
 });
 
-Ext.reg('gxp_wmslayerpanel', gxp.WMSLayerPanel); 
+Ext.reg('gxp_wmslayerpanel', gxp.WMSLayerPanel);

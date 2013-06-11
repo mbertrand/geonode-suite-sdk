@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2008-2012 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
@@ -19,7 +19,7 @@ Ext.namespace("gxp");
 
 /** api: constructor
  *  .. class:: CatalogueSearchPanel(config)
- *   
+ *
  *      Create a panel for searching a CS-W.
  */
 gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
@@ -65,6 +65,9 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
     datasourceLabel: "Data source",
     filterLabel: "Filter search by",
     removeSourceTooltip: "Switch back to original source",
+    topicCategories: null,
+    defaultTopic: "General",
+
     /* end i18n */
 
     /** private: method[initComponent]
@@ -117,7 +120,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                          },
                          scope: this
                     },
-                    width: 300
+                    width: 250
                 }, {
                     xtype: "button",
                     text: this.searchButtonText,
@@ -126,23 +129,12 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                 }]
             }, {
                 xtype: "fieldset",
-                collapsible: true,
-                collapsed: true,
+                collapsible: false,
+                collapsed: false,
                 hideLabels: false,
+                hidden: true,
                 title: this.advancedTitle,
-                items: [{
-                    xtype: 'gxp_cswfilterfield',
-                    name: 'datatype',
-                    property: 'apiso:Type',
-                    comboFieldLabel: this.datatypeLabel,
-                    comboStoreData: [
-                        ['dataset', 'Dataset'],
-                        ['datasetcollection', 'Dataset collection'],
-                        ['application', 'Application'],
-                        ['service', 'Service']
-                    ],
-                    target: this
-                }, {
+                items: [ {
                     xtype: 'gxp_cswfilterfield',
                     name: 'extent',
                     property: 'BoundingBox',
@@ -157,27 +149,28 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                     name: 'category',
                     property: 'apiso:TopicCategory',
                     comboFieldLabel: this.categoryLabel,
-                    comboStoreData: [
-                        ['farming', 'Farming'],
-                        ['biota', 'Biota'],
-                        ['boundaries', 'Boundaries'],
-                        ['climatologyMeteorologyAtmosphere', 'Climatology/Meteorology/Atmosphere'],
-                        ['economy', 'Economy'],
-                        ['elevation', 'Elevation'],
-                        ['environment', 'Environment'],
-                        ['geoscientificinformation', 'Geoscientific Information'],
-                        ['health', 'Health'],
-                        ['imageryBaseMapsEarthCover', 'Imagery/Base Maps/Earth Cover'],
-                        ['intelligenceMilitary', 'Intelligence/Military'],
-                        ['inlandWaters', 'Inland Waters'],
-                        ['location', 'Location'],
-                        ['oceans', 'Oceans'],
-                        ['planningCadastre', 'Planning Cadastre'],
-                        ['society', 'Society'],
-                        ['structure', 'Structure'],
-                        ['transportation', 'Transportation'],
-                        ['utilitiesCommunications', 'Utilities/Communications']
-                    ],
+                    comboStoreData: this.topicCategories ? this.topicCategories :
+                        [
+                            ['farming', 'Farming'],
+                            ['biota', 'Biota'],
+                            ['boundaries', 'Boundaries'],
+                            ['climatologyMeteorologyAtmosphere', 'Climatology/Meteorology/Atmosphere'],
+                            ['economy', 'Economy'],
+                            ['elevation', 'Elevation'],
+                            ['environment', 'Environment'],
+                            ['geoscientificinformation', 'Geoscientific Information'],
+                            ['health', 'Health'],
+                            ['imageryBaseMapsEarthCover', 'Imagery/Base Maps/Earth Cover'],
+                            ['intelligenceMilitary', 'Intelligence/Military'],
+                            ['inlandWaters', 'Inland Waters'],
+                            ['location', 'Location'],
+                            ['oceans', 'Oceans'],
+                            ['planningCadastre', 'Planning Cadastre'],
+                            ['society', 'Society'],
+                            ['structure', 'Structure'],
+                            ['transportation', 'Transportation'],
+                            ['utilitiesCommunications', 'Utilities/Communications']
+                        ],
                     target: this
                 }, {
                     xtype: "compositefield",
@@ -199,7 +192,7 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                             'select': function(cmb, record) {
                                 this.setSource(cmb.getValue());
                             },
-                            'render': function() { 
+                            'render': function() {
                                 this.sourceCombo.setValue(this.selectedSource);
                             },
                             scope: this
@@ -275,7 +268,12 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                     xtype: "actioncolumn",
                     width: 30,
                     items: [{
-                        iconCls: "gxp-icon-addlayers",
+                        getClass: function(v, meta, rec) {
+                            if (this.findWMS(rec.get("URI")) !== false || 
+                                this.findWMS(rec.get("references")) !== false) {
+                                    return "gxp-icon-addlayers";
+                            }
+                        },
                         tooltip: this.addMapTooltip,
                         handler: function(grid, rowIndex, colIndex) {
                             var rec = this.grid.store.getAt(rowIndex);
@@ -351,14 +349,30 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
      *  preferably.
      */
     findWMS: function(links) {
-        var url = null, name = null;
-        for (var i=0, ii=links.length; i<ii; ++i) {
-            var link = links[i];
-            if (link && link.toLowerCase().indexOf('service=wms') > 0) {
-                var obj = OpenLayers.Util.createUrlObject(link);
-                url = obj.protocol + "//" + obj.host + ":" + obj.port + obj.pathname;
-                name = obj.args.layers;
+        var protocols = [
+            'OGC:WMS-1.1.1-HTTP-GET-MAP',
+            'OGC:WMS'
+        ];
+        var url = null, name = null, i, ii, link;
+        // search for a protocol that matches WMS
+        for (i=0, ii=links.length; i<ii; ++i) {
+            link = links[i];
+            if (link.protocol && protocols.indexOf(link.protocol.toUpperCase()) !== -1 && link.value && link.name) {
+                url = link.value;
+                name = link.name;
                 break;
+            }
+        }
+        // if not found by protocol, try by inspecting the url
+        if (url === null) {
+            for (i=0, ii=links.length; i<ii; ++i) {
+                link = links[i];
+                if (link.value && link.value.toLowerCase().indexOf('service=wms') > 0) {
+                    var obj = OpenLayers.Util.createUrlObject(link.value);
+                    url = obj.protocol + "//" + obj.host + ":" + obj.port + obj.pathname;
+                    name = obj.args.layers;
+                    break;
+                }
             }
         }
         if (url !== null && name !== null) {
@@ -367,13 +381,18 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
                 name: name
             };
         } else {
-            return false;
+            var urlParts = links[0].split('/');
+            var name = urlParts[urlParts.length -1];
+            return {
+                url: links[0],
+                name: name
+            }
         }
     },
 
     /** private: method[addLayer]
      *  :arg record: ``GeoExt.data.LayerRecord`` The layer record to add.
-     *      
+     *
      *  Add a WMS layer coming from a catalogue search.
      */
     addLayer: function(record) {
@@ -397,9 +416,28 @@ gxp.CatalogueSearchPanel = Ext.extend(Ext.Panel, {
             this.fireEvent("addlayer", this, this.selectedSource, Ext.apply({
                 title: record.get('title')[0],
                 bbox: [left, bottom, right, top],
-                srs: "EPSG:4326"
+                srs: "EPSG:4326",
+                subject: this.getCategoryTitle(record)
             }, wmsInfo));
         }
+    },
+
+
+    getCategoryTitle: function(record){
+        var subject = this.defaultTopic;
+        try {
+            subject = record.get("subject")[0];
+        } catch (ex) {
+            return subject;
+        }
+        for (var c = 0; c < this.topicCategories.length; c++)
+        {
+            if (this.topicCategories[c][0] === subject) {
+                return this.topicCategories[c][1];
+            }
+        }
+        return subject;
+
     }
 
 });

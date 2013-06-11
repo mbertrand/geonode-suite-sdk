@@ -26,6 +26,7 @@ gxp.form.FontComboBox = Ext.extend(Ext.form.ComboBox, {
      *  "Courier New", "Tahoma", "Times New Roman", "Verdana"].
      */
     fonts: [
+        "Arial Unicode MS",
         "Serif",
         "SansSerif",
         "Arial",

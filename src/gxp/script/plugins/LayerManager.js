@@ -1,16 +1,16 @@
 /**
  * Copyright (c) 2008-2011 The Open Planning Project
- * 
+ *
  * Published under the GPL license.
  * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
  * of the license.
  */
 
 /**
- * @require plugins/LayerTree.js
- * @require GeoExt/plugins/TreeNodeComponent.js
- * @require GeoExt/widgets/WMSLegend.js
- * @require GeoExt/widgets/VectorLegend.js
+ * @requires plugins/LayerTree.js
+ * @requires GeoExt/plugins/TreeNodeComponent.js
+ * @requires GeoExt/widgets/WMSLegend.js
+ * @requires GeoExt/widgets/VectorLegend.js
  */
 
 /** api: (define)
@@ -28,6 +28,7 @@ Ext.namespace("gxp.plugins");
  *
  *    Plugin for adding a tree of layers with their legend to a
  *    :class:`gxp.Viewer`. Also provides a context menu on layer nodes.
+
  */   
 /** api: example
  *  If you want to change the vendor-specific legend_options parameter that 
@@ -48,7 +49,7 @@ Ext.namespace("gxp.plugins");
  *
  */
 gxp.plugins.LayerManager = Ext.extend(gxp.plugins.LayerTree, {
-    
+
     /** api: ptype = gxp_layermanager */
     ptype: "gxp_layermanager",
 
@@ -57,7 +58,7 @@ gxp.plugins.LayerManager = Ext.extend(gxp.plugins.LayerTree, {
      *  Text for baselayer node of layer tree (i18n).
      */
     baseNodeText: "Base Maps",
-    
+
     /** api: config[groups]
      *  ``Object`` The groups to show in the layer tree. Keys are group names,
      *  and values are either group titles or an object with ``title`` and
@@ -75,7 +76,7 @@ gxp.plugins.LayerManager = Ext.extend(gxp.plugins.LayerTree, {
      *          }
      *      }
      */
-    
+
     /** private: method[createOutputConfig] */
     createOutputConfig: function() {
         var tree = gxp.plugins.LayerManager.superclass.createOutputConfig.apply(this, arguments);
@@ -87,10 +88,10 @@ gxp.plugins.LayerManager = Ext.extend(gxp.plugins.LayerTree, {
                 ptype: "gx_treenodecomponent"
             }]
         }, this.treeConfig));
-        
-        return tree;        
+
+        return tree;
     },
-    
+
     /** private: method[configureLayerNode] */
     configureLayerNode: function(loader, attr) {
         gxp.plugins.LayerManager.superclass.configureLayerNode.apply(this, arguments);
@@ -98,8 +99,6 @@ gxp.plugins.LayerManager = Ext.extend(gxp.plugins.LayerTree, {
         // add a WMS legend to each node created
         if (OpenLayers.Layer.WMS && attr.layer instanceof OpenLayers.Layer.WMS) {
             legendXType = "gx_wmslegend";
-        } else if (OpenLayers.Layer.Vector && attr.layer instanceof OpenLayers.Layer.Vector) {
-            legendXType = "gx_vectorlegend";
         }
         if (legendXType) {
             var baseParams;
@@ -126,7 +125,7 @@ gxp.plugins.LayerManager = Ext.extend(gxp.plugins.LayerTree, {
             });
         }
     }
-    
+
 });
 
 Ext.preg(gxp.plugins.LayerManager.prototype.ptype, gxp.plugins.LayerManager);
