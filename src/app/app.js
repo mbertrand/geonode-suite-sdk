@@ -22,9 +22,9 @@
  * @require plugins/FeatureEditor.js
  */
 
-Ext.ns("MyApp");
+Ext.ns("WorldMap");
 
-MyApp.Viewer = Ext.extend(gxp.Viewer, {
+WorldMap.Viewer = Ext.extend(gxp.Viewer, {
 
     constructor: function(config) {
         config = config || {};
@@ -166,10 +166,10 @@ MyApp.Viewer = Ext.extend(gxp.Viewer, {
             });
             config.map.items = items;
         }
-        MyApp.Viewer.superclass.constructor.apply(this, [config]);
+        WorldMap.Viewer.superclass.constructor.apply(this, [config]);
     }
 
 });
 
 // mixin
-Ext.override(MyApp.Viewer, GeoNode.ComposerMixin);
+Ext.override(WorldMap.Viewer, GeoNode.ComposerMixin);
