@@ -82,11 +82,13 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
             enableKeyEvents: true,
             listeners: {
                 "valid": function() {
-                    saveAsButton.enable();
-                    saveButton.enable();
+                    if (urlField.isValid()) {
+                        //saveAsButton.enable();
+                        saveButton.enable();
+                    }
                 },
                 "invalid": function() {
-                    saveAsButton.disable();
+                    //saveAsButton.disable();
                     saveButton.disable();
                 }
             }
@@ -94,17 +96,98 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
 
         var abstractField = new Ext.form.TextArea({
             width: '95%',
-            height: 200,
-            fieldLabel: this.metaDataMapAbstract,
+            height: 50,
+            fieldLabel: this.target.metaDataMapAbstract,
             value: this.target.about["abstract"]
         });
+
+        //Make sure URL is not taken; if it is, show list of taken url's that start with field value
+        Ext.apply(Ext.form.VTypes, {
+            UniqueMapId : this.target.id,
+            UniqueUrl: function(value, field) {
+
+                var allowedChars = value.match(/^(\w+[-]*)+$/g);
+                if (!allowedChars) {
+                    this.UniqueUrlText = "URL's can only contain letters, numbers, dashes & underscores."
+                    return false;
+                }
+
+                Ext.Ajax.request({
+                    url: "/maps/checkurl/",
+                    method: 'POST',
+                    params : {query:value, mapid: this.UniqueMapId},
+                    success: function(response, options) {
+                        var urlcount = Ext.decode(response.responseText).count;
+                        if (urlcount > 0) {
+                            this.UniqueUrlText = "The following URL's are already taken:";
+                            var urls = Ext.decode(response.responseText).urls;
+                            var isValid = true;
+                            for (var u in urls) {
+                                if (urls[u].url != undefined && urls[u].url != null)
+                                    this.UniqueUrlText += "<br/>" + urls[u].url;
+                                if (urls[u].url == value) {
+                                    isValid = false;
+                                }
+
+                            }
+                            if (!isValid)
+                                field.markInvalid(this.UniqueUrlText);
+                        }
+                    },
+                    failure: function(response, options) {
+                        return false;
+                        Ext.Msg.alert('Error', response.responseText, this.showMetadataForm);
+                    },
+                    scope: this
+                });
+                return true;
+            },
+
+            UniqueUrlText: "The following URL's are already taken, please choose another"
+        });        
+        
+        
+        var urlField = new Ext.form.TextField({
+            width:'30%',
+            fieldLabel: this.target.metaDataMapUrl + "<br/><span style='font-style:italic;'>http://" + document.location.hostname + "/maps/</span>",
+            labelSeparator:'',
+            enableKeyEvents: true,
+            validationEvent: 'onblur',
+            vtype: 'UniqueUrl',
+            itemCls:'x-form-field-inline',
+            ctCls:'x-form-field-inline',
+            value: this.target.about["urlsuffix"],
+            listeners: {
+                "valid": function() {
+                    if (titleField.isValid()) {
+                        //saveAsButton.enable();
+                        saveButton.enable();
+                    }
+                },
+                "invalid": function() {
+                    //saveAsButton.disable();
+                    saveButton.disable();
+                }
+            }
+        });        
+        
+        var introTextField = new Ext.form.TextArea({
+            width: 550,
+            height: 200,
+            fieldLabel: this.target.metaDataMapIntroText,
+            id: "intro_text_area",
+            value: this.target.about["introtext"]
+        });
+        
 
         var metaDataPanel = new Ext.FormPanel({
             bodyStyle: {padding: "5px"},
             labelAlign: "top",
             items: [
                 titleField,
-                abstractField
+                urlField,
+                abstractField,
+                introTextField
             ]
         });
         metaDataPanel.enable();
@@ -114,8 +197,19 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
             disabled: !this.target.about.title,
             handler: function(e){
                 delete this.target.id;
+                
                 this.target.about.title = titleField.getValue();
                 this.target.about["abstract"] = abstractField.getValue();
+                this.target.about["urlsuffix"] = urlField.getValue();
+                this.target.about["introtext"] = nicEditors.findEditor('intro_text_area').getContent();                
+                
+                var treeConfig = [];
+                for (x = 0,max = this.target.layerTree.overlayRoot.childNodes.length; x < max; x++) {
+                    node = this.target.layerTree.overlayRoot.childNodes[x];
+                    treeConfig.push({group : node.text, expanded:  node.expanded.toString()  });
+                }
+                this.target.map["groups"] = treeConfig;
+                
                 this.metadataForm.hide();
                 this._doSave = true;
                 this.target.save(this.metadataForm.saveCallback);
@@ -128,6 +222,16 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
             handler: function(e){
                 this.target.about.title = titleField.getValue();
                 this.target.about["abstract"] = abstractField.getValue();
+                this.target.about["urlsuffix"] = urlField.getValue();
+                this.target.about["introtext"] = nicEditors.findEditor('intro_text_area').getContent();      
+                
+                var treeConfig = [];
+                for (x = 0,max = this.target.layerTree.overlayRoot.childNodes.length; x < max; x++) {
+                    node = this.target.layerTree.overlayRoot.childNodes[x];
+                    treeConfig.push({group : node.text, expanded:  node.expanded.toString()  });
+                }
+                this.target.map["groups"] = treeConfig;                
+                
                 this.metadataForm.hide();
                 this._doSave = true;
                 this.target.save(this.metadataForm.saveCallback);
@@ -141,7 +245,7 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
             saveCallback: callback,
             items: metaDataPanel,
             modal: true,
-            width: 400,
+            width: 600,
             autoHeight: true,
             bbar: [
                 "->",
@@ -152,6 +256,8 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
                     handler: function() {
                         titleField.setValue(this.target.about.title);
                         abstractField.setValue(this.target.about["abstract"]);
+                        urlField.setValue(this.about["urlsuffix"]);
+                        introTextField.setValue(this.about["introtext"]);
                         this.metadataForm.hide();
                     },
                     scope: this
@@ -159,6 +265,8 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
             ]
         });
     },
+    
+
 
     /** private: method[showMetadataForm]
      *  Shows the window with a metadata form
@@ -170,6 +278,7 @@ GeoNode.plugins.Save = Ext.extend(gxp.plugins.Tool, {
             this.metadataForm.saveCallback = callback;
         }
         this.metadataForm.show();
+        var metaNicEditor = new nicEditor({fullPanel : true,  maxHeight: 200, iconsPath: nicEditIconsPath}).panelInstance('intro_text_area')
     }
 
 });
@@ -332,7 +441,7 @@ Ext.preg(GeoNode.plugins.XHRTrouble.prototype.ptype, GeoNode.plugins.XHRTrouble)
  */
 GeoNode.plugins.LayerInfo = Ext.extend(gxp.plugins.Tool, {
 
-    /** api: ptype = gxp_removelayer */
+    /** api: ptype = gn_layerinfo */
     ptype: "gn_layerinfo",
 
     /** api: config[menuText]

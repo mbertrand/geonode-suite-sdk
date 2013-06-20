@@ -69,7 +69,10 @@ gxp.plugins.PicasaFeedSource = Ext.extend(gxp.plugins.FeedSource, {
             // adds the thumbnail attribute to the feature
             createFeatureFromItem: function(item) {
                 var feature = OpenLayers.Format.GeoRSS.prototype.createFeatureFromItem.apply(this, arguments);
-                feature.attributes.thumbnail = this.getElementsByTagNameNS(item, "http://search.yahoo.com/mrss/", "thumbnail")[0].getAttribute("url");
+                var thumbnails = this.getElementsByTagNameNS(item, "http://search.yahoo.com/mrss/", "thumbnail");
+                if (thumbnails.length > 0) {
+                	feature.attributes.thumbnail = thumbnails[0].getAttribute("url");
+                }
                 feature.attributes.content = OpenLayers.Util.getXmlNodeValue(this.getElementsByTagNameNS(item, "*","summary")[0]);
                 return feature;
             }

@@ -118,11 +118,17 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
      */
     layerSelectionText: "View available data from:",
     
-    /** api: config[instructionsText]
+    /** api: config[gr]
      *  ``String``
-     *  Text for additional instructions at the bottom of the grid (i18n).
-     *  None by default.
+     *  Text for the layer selection (i18n).
      */
+    layerSelectionText: "View available data from:",
+    
+    /** api: config[defaultCategoryText]
+     *  ``String``
+     *  Text for default category name
+     */
+    defaultCategoryText: "General",
     
     /** api: config[doneText]
      *  ``String``
@@ -352,9 +358,9 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                     layerConfig.source = this.initialConfig.catalogSourceKey !== null ? 
                         this.initialConfig.catalogSourceKey : sourceKey;
                     var record = source.createLayerRecord(layerConfig);
-                    record.set("group", layerConfig.subject);
+                    record.set("group", layerConfig.subject || this.defaultCategoryText);
                     if (this.layerTree) {
-                        this.layerTree.addCategoryFolder({"group":layerConfig.subject});
+                        this.layerTree.addCategoryFolder({"group":record.get("group")});
                     }
 
                     this.target.mapPanel.layers.add(record);
@@ -721,13 +727,16 @@ gxp.plugins.AddLayers = Ext.extend(gxp.plugins.Tool, {
                         extent.extend(record.getLayer().maxExtent);
                     }
                 }
+                if (!record.get("group")) {
+                	record.set("group", this.defaultCategoryText);
+                }
                 if (record.get("group") === "background") {
                     // layer index 0 is the invisible base layer, so we insert
                     // at position 1.
                     layerStore.insert(1, [record]);
                 } else {
                     if (this.layerTree) {
-                        this.layerTree.createCategoryFolder({"title":record.get("group")});
+                        this.layerTree.addCategoryFolder({"group":record.get("group")});
                     }
                     layerStore.add([record]);
                 }

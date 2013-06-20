@@ -35,9 +35,16 @@
  * @require plugins/ZoomToSelectedFeatures.js
  * @require plugins/QueryForm.js
  * @require plugins/FeatureGrid.js
+ * @require plugins/AddCategory.js
+ * @require plugins/RenameCategory.js
+ * @require plugins/RemoveCategory.js
  * @require widgets/ScaleOverlay.js
  * @require widgets/CrumbPanel.js
  * @require widgets/GoogleEarthPanel.js
+ * @require widgets/NewSourceWindow.js
+ * @require plugins/GeoNodeSource.js
+ * @require plugins/PicasaFeedSource.js
+ * @require plugins/YouTubeFeedSource.js
  * @require GeoExplorer.js
  * @require Composer.js
  * @require Viewer.js
