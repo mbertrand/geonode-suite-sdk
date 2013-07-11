@@ -35,6 +35,8 @@ gxp.plugins.GeoLocator = Ext.extend(gxp.plugins.Tool, {
      *  Text for feature info action tooltip (i18n).
      */
     infoActionTip: "Get My Location",
+    
+    locationFailedText: "Location detection failed",
 
     iconCls: "gxp-icon-geolocate",
     
@@ -138,7 +140,7 @@ gxp.plugins.GeoLocator = Ext.extend(gxp.plugins.Tool, {
         });
 
         geolocate.events.register("locationfailed", this, function() {
-            OpenLayers.Console.log('Location detection failed');
+            OpenLayers.Console.log(this.locationFailedText);
         });
 
         // Add OpenLayers.Control.Geolocate to the mao

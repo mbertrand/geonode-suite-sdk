@@ -144,7 +144,13 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      */
     addOutput: function(config) {
         config = Ext.apply(this.createOutputConfig(), config || {});
-        return gxp.plugins.LayerTree.superclass.addOutput.call(this, config);
+        var output = gxp.plugins.LayerTree.superclass.addOutput.call(this, config);
+        output.on({
+            contextmenu: this.handleTreeContextMenu,
+            beforemovenode: this.handleBeforeMoveNode,
+            scope: this
+        });
+        return output;
     },
 
     /** private: method[createOutputConfig]
@@ -202,6 +208,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         return {
             xtype: "treepanel",
             root: treeRoot,
+            plugins: new NodeMouseoverPlugin(),
             rootVisible: false,
             shortTitle: this.shortTitle,
             border: false,
@@ -299,7 +306,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
      * Enclose URL's in a string with <a> tags IF there are no <a> tags already present in the string.
      */
     replaceURLWithHTMLLinks: function(text) {
-        if (text != null  && text.indexOf("<a") == -1) {
+        if (text != null  && !text.match(/\<a|\<img/ig)) {
             var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
             return text.replace(exp,"<a href='$1'>$1</a>");
         }  else 
@@ -319,7 +326,7 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 return r.getLayer() === layer;
             }));
             if (record) {
-                attr.qtip = this.replaceURLWithHTMLLinks(record.get('abstract'));
+                attr.tiptext = this.replaceURLWithHTMLLinks(record.get('abstract'));
                 if (!record.get("queryable")) {
                     attr.iconCls = "gxp-tree-rasterlayer-icon";
                 }
@@ -366,6 +373,8 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
     },
 
     /** private: method[handleTreeContextMenu]
+     *  :arg node: ``Object`` The node
+     *  :arg e: The event
      */
     handleTreeContextMenu: function(node, e) {
         function toggleVisibility(item, node) {
@@ -391,9 +400,15 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 c.items.getCount() > 0 && c.showAt(e.getXY());
             }
         }
+        
+        //Hide the tooltip if it exists
+        if (this.tooltip) {
+        	this.tooltip.hide();
+        }
     },
 
     /** private: method[handleBeforeMoveNode]
+     * change the group when moving to a new container
      */
     handleBeforeMoveNode: function(tree, node, oldParent, newParent, i) {
         // change the group when moving to a new container
@@ -407,6 +422,9 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
         }
     },
 
+    /** private: method[handleBeforeNodeDrop]
+     * Don't allow node drop on top-level folders
+     */    
     handleBeforeNodeDrop: function(dropEvent) {
         var source_folder_id = undefined;
         var dest_folder = undefined;
@@ -427,25 +445,11 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
                 return true;
         }
 
-        // Folders can be dragged, but not into another folder
-//        if (dropEvent.data.node.attributes.iconCls == 'gxp-folder') {
-//            if (dropEvent.target.attributes.iconCls != "gxp-folder")
-//                dropEvent.target = dropEvent.target.parentNode;
-//            //alert('gx-folder::' + dropEvent.target.attributes.iconCls + ":" + dropEvent.point + ":" + dropEvent.target.parentNode.text + ":" + dropEvent.target.text);
-//            if (dropEvent.target.attributes.iconCls == 'gxp-folder' && dropEvent.target.parentNode.id == "layertree_overlay_root") {
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        } else {
-//            if (dropEvent.target.id != "layertree_overlay_root" && dropEvent.target.text != "background")
-//                return true;
-//            else
-//                return false;
-//        }
     },
 
-
+    /** private: method[handleMoveNode]
+     * Handle moving of layer nodes from one location to another in the tree
+     */
     handleMoveNode : function(tree, node, oldParent, newParent, index) {
         var mpl = this.target.mapPanel.layers;
         var x = 0;
@@ -488,9 +492,112 @@ gxp.plugins.LayerTree = Ext.extend(gxp.plugins.Tool, {
 
 Ext.preg(gxp.plugins.LayerTree.prototype.ptype, gxp.plugins.LayerTree);
 
+/**
+ * Handle moving of records in layertree data store
+ */
 Ext.data.Store.prototype.move = function(record, to){
     //var r = this.getAt(from);
     this.data.remove(record);
     this.data.insert(to, record);
     this.fireEvent("load", this, to);
 };
+
+/** api: constructor
+ *  .. class:: NodeMouseoverPlugin()
+ *
+ *    Plugin for displaying a custom tooltip when 
+ *    hovering over each layer in the layertree
+ *   
+ */
+NodeMouseoverPlugin = Ext.extend(Object, {
+    init: function(tree) {
+        if (!tree.rendered) {
+            tree.on('render', function() {this.init(tree)}, this);
+            return;
+        }
+        this.tree = tree;
+        tree.body.on('mouseover', this.onTreeMouseover, this, {delegate: 'a.x-tree-node-anchor'});
+    },
+
+    /** private: method[onTreeMouseover]
+     * onmouseover event for the layertree
+     */
+    onTreeMouseover: function(e, t) {
+        var nodeEl = Ext.fly(t).up('div.x-tree-node-el');
+        if (nodeEl) {
+            var nodeId = nodeEl.getAttributeNS('ext', 'tree-node-id');
+            if (nodeId) {
+            	var node = this.tree.getNodeById(nodeId);
+            	if (node.layerStore) {
+            		var abstractText = node.layerStore.getByLayer(node.layer).get("abstract")
+            		var treemanager = Ext.fly(t).up('div.gxp-layermanager-tree');
+                    
+            		//Create or update tooltip
+            		if (this.tooltip && abstractText) {
+            			this.tooltip.initTarget(node);
+            			this.tooltip.update(abstractText);           			
+            		} else if (abstractText) {
+            			this.tooltip = new Ext.ToolTip({
+            			id: 'layer_tooltip',
+            			target: node,
+            			autoHeight: true,
+            			dismissDelay: 0,
+            	        boxMaxHeight: 500,
+            	        maxWidth: 500,
+            	        autoScroll:true,
+            	        html: abstractText
+            			});
+            		} else if (this.tooltip) {
+            			this.tooltip.hide();
+            		} 
+            		
+            	
+        		    
+            		//Set or cancel timeouts for tooltip
+            		this.tooltip.on('show', function(){
+            		    	var timeout;
+                			var tooltip = this;
+                			
+                		    treemanager.on('mouseleave', function(){
+                		        timeout = window.setTimeout(function(){
+                		        	tooltip.hide();
+                		        }, 500);
+                		    }); 
+    
+                		    
+                		    tooltip.getEl().on('mouseleave', function(){
+                		    	if (timeout) {
+                    		        timeout = window.setTimeout(function(){
+                    		        	tooltip.hide();
+                    		        }, 500);                		    		
+                		    	}
+                		    });
+                		    
+                		    tooltip.getEl().on('mouseenter', function(){
+                		        window.clearTimeout(timeout);
+                		    });
+                		    
+
+                	});      
+            		
+            		// Show the tooltip only if there is something to show,
+            		// and offset by width of layertree panel
+            		if (abstractText) {
+            			this.tooltip.showAt([treemanager.dom.offsetWidth, e.xy[1]]);       
+                		//Resize height when content changes
+        			    if (this.tooltip.getHeight() > this.tooltip.boxMaxHeight) {
+        			    	this.tooltip.autoHeight = false;
+        			    	this.tooltip.setHeight(this.tooltip.boxMaxHeight);
+        			    } else {
+        			    	this.tooltip.autoHeight = true;
+        			    }
+            		}
+
+
+            	}
+                this.tree.fireEvent('mouseover', this.tree.getNodeById(nodeId), e);
+                
+            }
+        }
+    }
+});

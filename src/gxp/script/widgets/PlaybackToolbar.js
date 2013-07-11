@@ -51,6 +51,10 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     autoPlay:false,
     /* should the time slider be aggressive or not */
     aggressive: null,
+    /* should we prebuffer the time series or not */
+    prebuffer: null,
+    /* how many frames should we prebuffer at maximum */
+    maxframes: null,
     //api config ->timeDisplayConfig:null,
     //api property
     optionsWindow:null,
@@ -98,6 +102,8 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
         if(!this.control){
             this.controlConfig = Ext.applyIf(this.controlConfig || {}, {
                 dimension: 'time',
+                prebuffer: this.prebuffer,
+                maxframes: this.maxframes,
                 autoSync: true
             });
             this.control = this.buildTimeManager();
@@ -117,9 +123,24 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
                 map: this.mapPanel.map
             });
         }
-        this.control.model.events.on({
+        this.mapPanel.map.events.on({
+            'zoomend': function() {
+                if (this._prebuffer === true && this.mapPanel.map.zoom !== this.previousZoom) {
+                    this._stopPrebuffer = true;
+                    this.slider.progressEl.hide();
+                    this.mapPanel.map.events.un({'zoomend': arguments.callee, scope: this});
+                }
+                this.previousZoom = this.mapPanel.map.zoom;
+            }, scope: this
+        });
+        this.control.events.on({
             'prebuffer': function(evt) {
+                this._prebuffer = true;
+                if (this._stopPrebuffer === true) {
+                    this.slider.progressEl.hide();
+                }
                 this.slider.progressEl.setWidth(evt.progress*100 + '%');
+                return (this._stopPrebuffer !== true);
             },
             scope: this
         });
@@ -236,6 +257,20 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
             'slider': {
                 xtype: 'gxp_timeslider',
                 ref: 'slider',
+                listeners: {
+                    'sliderclick': {
+                        fn: function() {
+                            this._stopPrebuffer = true;
+                        },
+                        scope: this
+                    },
+                    'dragstart': {
+                        fn: function() {
+                            this._stopPrebuffer = true;
+                        },
+                        scope: this
+                    }
+                },
                 map: this.mapPanel.map,
                 timeManager: this.control,
                 model: this.dimModel,
@@ -496,6 +531,15 @@ gxp.PlaybackToolbar = Ext.extend(Ext.Toolbar, {
     }
 });
 
+
+gxp.PlaybackToolbar.timeFormats = {
+   'Minutes': 'l, F d, Y g:i A',
+   'Hours': 'l, F d, Y g A',
+   'Days': 'l, F d, Y',
+   'Months': 'F, Y',
+   'Years': 'Y'
+};
+
 /**
  * Static Methods
  */
@@ -503,22 +547,8 @@ gxp.PlaybackToolbar.guessTimeFormat = function(increment){
     if (increment) {
         var resolution = gxp.PlaybackToolbar.smartIntervalFormat(increment).units;
         var format = this.timeFormat;
-        switch (resolution) {
-            case 'Minutes':
-                format = 'l, F d, Y g:i A';
-                break;
-            case 'Hours':
-                format = 'l, F d, Y g A';
-                break;
-            case 'Days':
-                format = 'l, F d, Y';
-                break;
-            case 'Months':
-                format = 'F, Y';
-                break;
-            case 'Years':
-                format = 'Y';
-                break;
+        if (gxp.PlaybackToolbar.timeFormats[resolution]) {
+            format = gxp.PlaybackToolbar.timeFormats[resolution];
         }
         return format;
     }

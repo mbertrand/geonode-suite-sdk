@@ -15,11 +15,18 @@
  *  class = PicasaFeedSource
  */
 
-/** api: (extends)
- *  plugins/FeedSource.js
- */
-
-Ext.namespace("gxp.plugins");
+OpenLayers.Format.Picasa = OpenLayers.Class(OpenLayers.Format.GeoRSS, {
+    createFeatureFromItem: function(item) {
+        var feature = OpenLayers.Format.GeoRSS.prototype
+            .createFeatureFromItem.apply(this, arguments);
+        var thumbnails = this.getElementsByTagNameNS(item, "http://search.yahoo.com/mrss/", "thumbnail");
+        if (thumbnails.length > 0) {
+        	feature.attributes.thumbnail = thumbnails[0].getAttribute("url");
+        }
+        feature.attributes.content = OpenLayers.Util.getXmlNodeValue(this.getElementsByTagNameNS(item, "*","summary")[0]);
+        return feature;
+    }
+});
 
 gxp.plugins.PicasaFeedSource = Ext.extend(gxp.plugins.FeedSource, {
 
@@ -52,7 +59,11 @@ gxp.plugins.PicasaFeedSource = Ext.extend(gxp.plugins.FeedSource, {
      **/
     popupTemplate:  '<tpl for="."><a target="_blank" href="{link}"><img  title="{title}" src="{thumbnail}"/></a></tpl>',
 
-
+    /** api: config[fixed]
+     * ``Boolean`` Use OpenLayers.Strategy.Fixed if true, BBOX if false
+     **/    
+    fixed: false,
+    
     /**
      * Create a Picasa layer record
      * @param config

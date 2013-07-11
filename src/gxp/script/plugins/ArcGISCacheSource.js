@@ -24,6 +24,18 @@ gxp.plugins.ArcGISCacheSource = Ext.extend(gxp.plugins.ArcRestSource, {
     /** api: ptype = gxp_arcrestcachesource */
     ptype:"gxp_arcgiscachesource",
 
+    /** api: config[noLayersTitle]
+     *  ``String``
+     *  Title for no layers message (i18n).
+     */
+    noLayersTitle: "No ArcGIS Layers",
+    
+    /** api: config[noLayersText]
+     *  ``String``
+     *  Content of no layers message (i18n).
+     */
+    noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at ",
+    
     requiredProperties: ["name", "fullExtent", "tileInfo"],
 
     constructor:function (config) {
@@ -83,7 +95,9 @@ gxp.plugins.ArcGISCacheSource = Ext.extend(gxp.plugins.ArcRestSource, {
         };
 
         var processFailure = function (response) {
-            Ext.Msg.alert("No ArcGISCache Layers", "Could not find any compatible layers  at " + source.config.url);
+        	if (!response.isTimeout) {
+        		Ext.Msg.alert(source.noLayersTitle, source.noLayersText + source.config.url);
+        	}	
             source.fireEvent("failure", source);
         };
 
@@ -93,6 +107,7 @@ gxp.plugins.ArcGISCacheSource = Ext.extend(gxp.plugins.ArcRestSource, {
         if (!this.lazy) {
             Ext.Ajax.request({
                 url:baseUrl,
+                timeout: 2000,
                 params:{'f':'json', 'pretty':'false', 'keepPostParams':'true'},
                 method:'POST',
                 success:processResult,

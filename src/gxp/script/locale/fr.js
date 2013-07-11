@@ -342,6 +342,7 @@ GeoExt.Lang.add("fr", {
         zoomLevelText: "Niveau de zoom"
     },
 
+
     "gxp.Viewer.prototype": {
         saveErrorText: "Sauver Trouble: "
     },
@@ -357,6 +358,155 @@ GeoExt.Lang.add("fr", {
         doneText: "Terminé",
         titletext:  "Ajouter RSS",
         maxResultsText: "Articles Max"
-    }
+    },
+    
+    "gxp.plugins.ArcGISCacheSource.prototype": {
+        noLayersTitle: "No ArcGIS Layers",
+        noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at "
+    },    
+    
+    "gxp.plugins.ArcRestSource.prototype": {
+        noLayersTitle: "No ArcGIS Layers",
+        noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at "
+    },
+    
+    "gxp.plugins.MapShare.prototype": { 
+    	text: "Share Map",
+    	toolTip: "Map info and download links"
+    },
+    
+    "gxp.plugins.AnnotationTool.prototype": {
+        errorTitle: "Error creating annotation",
+        noteText: "Note",        
+        notesText: "Notes",
+        showNotesText: "Show notes",
+        editNotesText: "Edit notes",       
+        addNoteText: "Add note",        
+        newNoteText: "New note",
+        projection: "EPSG:4326",
+        pointText: "Point",
+        lineText: "Line",
+        polygonText: "Shape",
+        saveFailTitle: "Could not save note",
+        saveFailText: "Edit failed.  You might not have permission to save this note.",        
+        saveText: "Save",        
+        editText: "Edit",       
+        deleteText: "Delete",        
+        cancelText: "Cancel",        
+        titleText: "Title"
+    },
+    
+    "gxp.SearchBar.prototype": {
+    	emptyText: 'Enter search...',
+    	searchText: 'Search',
+    	noSearchableLayersTitle: 'No Searchable Layers',
+    	noSearchableLayersMsg: 'There are currently no searchable layers on the map.  You must have at least one visible layer with searchable fields on the map.',
+    	searchTermTitle: "Search Term Required", 
+    	searchTermText: "Please enter a search term",
+    	resetText: "Reset"
+    },
+    
+    "gxp.plugins.PrintPage.prototype": {
+        menuText: "Print Map",
+        tooltip: "Print Map",
+        buttonText: "Print"
+    },
+    
+    "gxp.plugins.CoordinateTool.prototype": {
+        title: "Map Coordinates (longitude, latitude)",
+        infoActionTip: "Get coordinates at the mouse position",
+        coordinatePositionText: "CoordinatePosition"
+    },
+    
+    "gxp.plugins.FeedSource.prototype": {
+        title: 'Feed Source'
+    },
+    
+    "gxp.plugins.HGLSource.prototype": {
+        title: 'Harvard Geospatial Library Source'
+    },
+    
+    "gxp.plugins.HGLFeedSource.prototype" : {
+        title: 'HGL Feed Source'
+    },
+    
+    "gxp.plugins.PicasaFeedSource.prototype" : {
+        title: 'Picasa Source'
+    },
+    
+    "gxp.plugins.YouTubeFeedSource.prototype" : {
+        title: 'YouTube Source'
+    },
+    
+    "gxp.plugins.GeoLocator.prototype": {
+        infoActionTip: "Get My Location",
+        locationFailedText: "Location detection failed"
+    },
+    
+    "gxp.plugins.LayerShare.prototype": {
+        menuText: "Share Layer",
+        toolTip: "Layer info and download links"
+    },
 
+    "gxp.plugins.MapShare.prototype": {
+        text: "Share My Map",
+        toolTip: "Map info and download links"
+    },    
+
+    "gxp.plugins.AddCategory.prototype": {
+        addCategoryMenuText:"Add Category",
+        addCategoryActionTipText:"Add a category to the layer tree",
+        categoryNameText: "Category name:"
+    },    
+    
+    "gxp.plugins.RemoveCategory.prototype": {
+    	removeCategoryActionText:"Remove Category",
+    	removeCategoryActionTipText: "Remove this category and all its layers from the map",
+    	cannotRemoveText: "This category cannot be removed"
+    },
+    
+    "gxp.plugins.RenameCategory.prototype": {
+        renameCategoryActionText:"Rename Category",
+        renameCategoryActionTipText:"Give this category a new name",
+        cannotRenameText: "This category cannot be renamed"
+    },
+    
+    "gxp.LinkEmbedMapDialog.prototype": {
+    	linkMessage: 'Paste link in email or IM'
+    },    
+    
+    "gxp.plugins.GeoNodeQueryTool.prototype" : {
+        infoActionTip: "Get Feature Info",
+        popupTitle: "Feature Info",
+        resetTitle: "Reset",
+        resetToolTipText: " Clear all features"
+    },
+    
+    "gxp.plugins.MapRevisionTool.prototype" : {
+    	infoActionTip: 'View a list of map revisions',
+    	toolText: 'Revisions',
+    	windowTitle: "Map Revision History"
+    },
+    
+    "gxp.plugins.GazetteerTool.prototype" : {
+        infoActionTip: 'Enter a place name to search for',
+        toolText: 'Gazetteer',
+        searchingText: 'Searching...',
+        fromText: 'From: YYYY-MM-DD',
+        toText: 'To: YYYY-MM-DD',
+        datesText: 'Dates',
+        geocodersText: 'Geocoders', 
+        advancedText: 'Advanced',
+        sourceText: 'Source',
+        startDateText: 'Start Date',
+        endDateText: 'End Date',  	
+        placenameText: 'Place name',
+        coordinatesText: 'Coordinates'  	
+    },
+    
+    "gxp.plugins.StreetViewTool.js" : {
+    	toolText: "Google Street View",
+    	streetViewTitle: "Google Street View",  	
+    	infoActionTip: "Click on the map to see Google Street View"
+    }
 });

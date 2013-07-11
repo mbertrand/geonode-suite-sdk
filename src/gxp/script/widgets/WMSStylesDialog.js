@@ -744,9 +744,9 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             // and repopulate from GetStyles
             this.stylesStore.removeAll();
             this.selectedStyle = null;
-
-            var userStyle, record, index;
-            for (var i = 0, len = userStyles.length; i < len; ++i) {
+            
+            var userStyle, record, index, defaultStyle;
+            for (var i=0, len=userStyles.length; i<len; ++i) {
                 userStyle = userStyles[i];
                 // remove existing record - this way we replace styles from
                 // userStyles with inline styles.
@@ -765,6 +765,14 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
                     (!initialStyle && userStyle.isDefault === true))) {
                     this.selectedStyle = record;
                 }
+                if (userStyle.isDefault === true) {
+                    defaultStyle = record;
+                }
+            }
+            // fallback to the default style, this can happen when the layer referenced
+            // a non-existing style as initialStyle
+            if (!this.selectedStyle) {
+                this.selectedStyle = defaultStyle;
             }
 
             this.addRulesFieldSet();
@@ -773,7 +781,10 @@ gxp.WMSStylesDialog = Ext.extend(Ext.Container, {
             this.stylesStoreReady();
             layerParams.SLD_BODY && this.markModified();
         }
-        catch (e) {
+        catch(e) {
+            if (window.console) {
+                console.warn(e.msg);
+            }
             this.setupNonEditable();
         }
     },

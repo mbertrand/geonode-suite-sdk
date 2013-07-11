@@ -1,11 +1,20 @@
 /**
- * Created by
- * User: mbertrand
- * Date: 6/13/11
- * Time: 8:16 AM
- *
+ * Copyright (c) 2008-2011 The Open Planning Project
+ * 
+ * Published under the GPL license.
+ * See https://github.com/opengeo/gxp/raw/master/license.txt for the full text
+ * of the license.
  */
 
+/**
+ * @requires plugins/LayerSource.js
+ * @requires OpenLayers/Layer/ArcGIS93Rest.js
+ */
+
+/** api: (define)
+ *  module = gxp.plugins
+ *  class = ArcRestSource
+ */
 
 /** api: (extends)
  *  plugins/LayerSource.js
@@ -15,7 +24,33 @@ Ext.namespace("gxp.plugins");
 /** api: constructor
  *  .. class:: ArcRestSource(config)
  *
- *    Plugin for using ArcGIS REST layers with :class:`gxp.Viewer` instances.
+ *    Plugin for using ArcGIS REST MapServer layers with :class:`gxp.Viewer` instances.
+ *
+ */
+/** api: example
+ *  The configuration in the ``sources`` property of the :class:`gxp.Viewer` is
+ *  straightforward:
+ *
+ *  .. code-block:: javascript
+ *
+ *    defaultSourceType: "gxp_arcrestsource",
+ *    sources: {
+ *        "arcgisrest": {
+ *            url: "http://cga6.cga.harvard.edu/arcgis/rest/services/darmc/roman/MapServer"
+ *        }
+ *    }
+ *
+ *  A typical configuration for a layer from this source (in the ``layers``
+ *  array of the viewer's ``map`` config option would look like this:
+ *
+ *  .. code-block:: javascript
+ *
+ *    {
+ *        source: "arcgisrest",
+ *        name: "Routes",
+ *        layerid: "show:74"
+ *    }
+>>>>>>> gxpcore/master
  *
  */
 
@@ -24,6 +59,18 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
     /** api: ptype = gxp_arcrestsource */
     ptype:"gxp_arcrestsource",
 
+    /** api: config[noLayersTitle]
+     *  ``String``
+     *  Title for no layers message (i18n).
+     */
+    noLayersTitle: "No ArcGIS Layers",
+    
+    /** api: config[noLayersText]
+     *  ``String``
+     *  Content of no layers message (i18n).
+     */
+    noLayersText: "Could not find any layers with a compatible projection (Web Mercator) at ",
+    
     requiredProperties: ["name"],
 
     constructor:function (config) {
@@ -62,7 +109,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
                             displayInLayerSwitcher:true,
                             visibility:true,
                             projection:layerProjection,
-                            queryable:json.capabilities && json.capabilities.indexOf("Identify") > -1}
+                            queryable:json.capabilities && json.capabilities["Identify"]}
                     ));
                 }
             } else {
@@ -90,7 +137,9 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         };
 
         var processFailure = function (response) {
-            Ext.Msg.alert("No ArcGIS Layers", "Could not find any compatible layers  at " + source.config.url);
+        	if (!response.isTimeout) {
+        		Ext.Msg.alert(source.noLayersTitle, source.noLayersText + source.config.url);
+        	}	
             source.fireEvent("failure", source);
         };
 
@@ -100,6 +149,7 @@ gxp.plugins.ArcRestSource = Ext.extend(gxp.plugins.LayerSource, {
         if (!this.lazy) {
             Ext.Ajax.request({
                 url:baseUrl,
+                timeout: 2000,
                 params:{'f':'json', 'pretty':'false', 'keepPostParams':'true'},
                 method:'POST',
                 success:processResult,

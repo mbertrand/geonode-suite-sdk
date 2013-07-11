@@ -68,7 +68,9 @@ gxp.plugins.CoordinateTool = Ext.extend(gxp.plugins.Tool, {
      *  Text for feature info action tooltip (i18n).
      */
     infoActionTip: "Get coordinates at the mouse position",
-
+    
+    coordinatePositionText: "CoordinatePosition",
+    
     toolText: null,
 
     iconCls: "gxp-icon-getfeatureinfo",
@@ -77,14 +79,12 @@ gxp.plugins.CoordinateTool = Ext.extend(gxp.plugins.Tool, {
 
     coordDialog: new gxp.MouseCoordinatesDialog(),
 
-    markers: new OpenLayers.Layer.Markers("CoordinatePosition",{displayInLayerSwitcher:false}),
+    markers: new OpenLayers.Layer.Markers(this.coordinatePositionText,{displayInLayerSwitcher:false}),
 
     createMarker: function(e){
         this.markers.clearMarkers();
 
         var size = new OpenLayers.Size(121,125);
-        var icon = new OpenLayers.Icon('/media/theme/img/WorldMap-Logo_26px.png', size);
-        //this.markers.addMarker(new OpenLayers.Marker(0,0),icon);
         this.markers.addMarker(new OpenLayers.Marker(new OpenLayers.LonLat(e.lon,e.lat)));
     },
 

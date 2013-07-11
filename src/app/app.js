@@ -38,13 +38,27 @@
  * @require plugins/AddCategory.js
  * @require plugins/RenameCategory.js
  * @require plugins/RemoveCategory.js
+ * @require plugins/GeoNodeSource.js
+ * @require plugins/PicasaFeedSource.js
+ * @require plugins/YouTubeFeedSource.js
+ * @require plugins/AnnotationTool.js
+ * @require plugins/GeoNodeQueryTool.js
+ * @require plugins/ArcGISCacheSource.js
+ * @require plugins/CoordinateTool.js
+ * @require plugins/MapShare.js
+ * @require plugins/StreetViewTool.js
+ * @require widgets/MouseCoordinatesDialog.js
+ * @require plugins/MapRevisionTool.js
+ * @require plugins/TMSSource.js
+ * @require plugins/StamenSource.js
+ * @require widgets/WMSLayerPanel.js
+ * @require widgets/FeedSourceWindow.js
+ * @require widgets/SearchBar.js
  * @require widgets/ScaleOverlay.js
  * @require widgets/CrumbPanel.js
  * @require widgets/GoogleEarthPanel.js
  * @require widgets/NewSourceWindow.js
- * @require plugins/GeoNodeSource.js
- * @require plugins/PicasaFeedSource.js
- * @require plugins/YouTubeFeedSource.js
+ * @require widgets/
  * @require GeoExplorer.js
  * @require Composer.js
  * @require Viewer.js

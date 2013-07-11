@@ -35,27 +35,33 @@ gxp.plugins.AddCategory = Ext.extend(gxp.plugins.Tool, {
      *  ``String``
      *  Text for Add Category menu item (i18n).
      */
-    addCategoryActionText:"Add Category",
+    addCategoryMenuText:"Add Category",
+
+    /** api: config[addCategoryActionTipText]
+     *  ``String``
+     *  Text for add category action tooltip (i18n).
+     */
+    addCategoryActionTipText:"Add a category to the layer tree",
 
     /** api: config[addCategoryTip]
      *  ``String``
      *  Text for add category action tooltip (i18n).
-     */
-    addCategoryActionTipText:"Add category",
+     */    
+    categoryNameText: "Category name:",
 
     /** api: method[addActions]
      */
     addActions:function () {
         var actions = gxp.plugins.AddCategory.superclass.addActions.apply(this, [
             {
-                menuText:this.addCategoryActionText,
+                menuText:this.addCategoryMenuText,
                 iconCls:"icon-add",
                 disabled:false,
                 folderAction: true,
                 tooltip:this.addCategoryActionTipText,
                 handler:function () {
                     var tree = this.target.layerTree;
-                    Ext.MessageBox.prompt('Add Category', 'Category name:', function (btn, text) {
+                    Ext.MessageBox.prompt(this.addCategoryMenuText, this.categoryNameText, function (btn, text) {
                         if (btn == 'ok') {
                             tree.addCategoryFolder({"group":text}, true);
                         }

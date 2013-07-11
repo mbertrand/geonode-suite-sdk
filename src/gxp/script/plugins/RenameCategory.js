@@ -27,26 +27,34 @@ Ext.namespace("gxp.plugins");
  *    TODO Make this plural - selected layers
  */
 gxp.plugins.RenameCategory = Ext.extend(gxp.plugins.Tool, {
+	
     /** api: ptype = gxp_addcategory */
     ptype:"gxp_renamecategory",
 
-    /** api: config[renameCategoryMenuText]
+    /** api: config[renameCategoryActionText]
      *  ``String``
      *  Text for rename Category menu item (i18n).
      */
     renameCategoryActionText:"Rename Category",
 
-    /** api: config[renameCategoryTip]
+    /** api: config[renameCategoryActionTipText]
      *  ``String``
      *  Text for rename category action tooltip (i18n).
      */
-    renameCategoryActionTipText:"Rename category",
+    renameCategoryActionTipText:"Give this category a new name",
 
-    /** api: method[addActions]
+    /** api: config[cannotRenameText]
+     *  ``String``
+     *  Text for cannot rename category message (i18n).
+     */    
+    cannotRenameText: "This category cannot be renamed",
+    
+    
+    /** api: method[renameNode]
      */
-    addActions:function () {
-
-        var getRecordFromNode = function(node) {
+    renameNode: function (node) {
+    	
+        var getRecordFromNode =  function(node) {
             var record;
             if (node && node.layer) {
                 var layer = node.layer;
@@ -57,34 +65,38 @@ gxp.plugins.RenameCategory = Ext.extend(gxp.plugins.Tool, {
             }
             return record;
         };
+        
+        Ext.MessageBox.prompt(this.renameCategoryActionText, this.renameCategoryActionTipText, function (btn, text) {
+            if (btn == 'ok') {
+                this.modified |= 1;
+                var a = node;
+                node.setText(text);
+                node.attributes.group = text;
+                node.group = text;
+                node.loader.filter = function (record) {
 
-        var renameNode = function (node) {
-            Ext.MessageBox.prompt('Rename Category', 'New name for \"' + node.text + '\"', function (btn, text) {
-                if (btn == 'ok') {
-                    this.modified |= 1;
-                    var a = node;
-                    node.setText(text);
-                    node.attributes.group = text;
-                    node.group = text;
-                    node.loader.filter = function (record) {
+                    return record.get("group") == text &&
+                        record.getLayer().displayInLayerSwitcher == true;
+                };
 
-                        return record.get("group") == text &&
-                            record.getLayer().displayInLayerSwitcher == true;
-                    };
+                node.eachChild(function (n) {
 
-                    node.eachChild(function (n) {
-
-                        var record = getRecordFromNode(n);
-                        if (record) {
-                            record.set("group", text);
-                        }
-                    });
+                    var record = getRecordFromNode(n);
+                    if (record) {
+                        record.set("group", text);
+                    }
+                });
 
 
-                    node.ownerTree.fireEvent('beforechildrenrendered', node.parentNode);
-                }
-            });
-        };
+                node.ownerTree.fireEvent('beforechildrenrendered', node.parentNode);
+            }
+        });
+    }, 
+    
+    
+    /** api: method[addActions]
+     */
+    addActions:function () {
 
         var actions = gxp.plugins.RenameCategory.superclass.addActions.apply(this, [
             {
@@ -95,10 +107,10 @@ gxp.plugins.RenameCategory = Ext.extend(gxp.plugins.Tool, {
                 tooltip:this.renameCategoryActionTipText,
                 handler:function (action) {
                     if (action.selectedNode.parentNode.isRoot) {
-                        Ext.Msg.alert(this.layerContainerText, "This category cannot be renamed");
+                        Ext.Msg.alert(this.layerContainerText, this.cannotRenameText);
                         return false;
                     }
-                    renameNode(action.selectedNode);
+                    this.renameNode(action.selectedNode);
                 },
                 scope:this
             }

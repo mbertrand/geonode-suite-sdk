@@ -34,11 +34,11 @@ gxp.plugins.MapShare = Ext.extend(gxp.plugins.Tool, {
     /** api: ptype = gxp_sharelayer */
     ptype: "gxp_mapshare",
 
-    /** api: config[menuText]
+    /** api: config[text]
      *  ``String``
      *  Text for layer share menu item (i18n).
      */
-    text: "Share Map",
+    text: "Share My Map",
 
     /** api: config[toolTip]
      *  ``String``
