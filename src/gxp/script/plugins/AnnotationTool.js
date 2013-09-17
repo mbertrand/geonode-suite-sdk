@@ -1,3 +1,13 @@
+/**
+ * @requires OpenLayers/Strategy/Save.js
+ * @requires OpenLayers/Control/DrawFeature.js
+ * @requires OpenLayers/Control/ModifyFeature.js
+ * @requires OpenLayers/Layer/Vector.js
+ * @requires OpenLayers/Strategy/BBOX.js
+ * @requires OpenLayers/Protocol/HTTP.js
+ * @requires OpenLayers/Format/GeoJSON.js
+ */
+
 Ext.namespace("gxp.plugins");
 
 gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
@@ -60,7 +70,8 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
         saveStrategy.events.register('fail', this, saveFail);
 
         var currentUser = this.user;
-
+		var isMapEditor = this.target.config["edit_map"];
+		
         var layer = new OpenLayers.Layer.Vector(
             'geo_annotation_layer', {
                 displayInLayerSwitcher: false,
@@ -70,7 +81,7 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
                     saveStrategy
                 ],
                 protocol: new OpenLayers.Protocol.HTTP({
-                    url: "/annotations/" + this.target.mapID,
+                    url: "/annotations/" + this.target.id,
                     format: new OpenLayers.Format.GeoJSON()
                 })
             });
@@ -354,7 +365,7 @@ gxp.plugins.AnnotationTool = Ext.extend(gxp.plugins.Tool, {
         return gxp.plugins.AnnotationTool.superclass.addActions.apply(
             this, [{
             text: this.notesText,
-            disabled: !this.target.mapID,
+            disabled: !this.target.id,
             iconCls: this.iconCls,
             toggleGroup: this.toggleGroup,
             enableToggle: true,

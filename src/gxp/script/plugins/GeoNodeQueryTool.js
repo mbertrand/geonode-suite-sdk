@@ -11,6 +11,10 @@
  *  class = GeoNodeQueryTool
  */
 
+/**
+ * @requires OpenLayers/Control/GetFeature.js
+ */
+
 /** api: (extends)
  *  plugins/Tool.js
  */

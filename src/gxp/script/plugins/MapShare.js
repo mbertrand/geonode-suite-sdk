@@ -55,12 +55,12 @@ gxp.plugins.MapShare = Ext.extend(gxp.plugins.Tool, {
     /** api: method[addActions]
      */
     addActions: function() {
-    	var link = this.linkPrefix + this.target.mapID + this.linkSuffix;
+    	var link = this.linkPrefix + this.target.id + this.linkSuffix;
         var actions = gxp.plugins.MapShare.superclass.addActions.call(this, [{
             iconCls: this.iconCls,
             text: this.text,
             tooltip: this.toolTip,
-            disabled: this.target.mapID == null,
+            disabled: this.target.id === 0,
             handler: function() {
                 window.open(link);
             },

@@ -69,7 +69,7 @@ GeoNode.DataGrid = Ext.extend(Ext.util.Observable, {
             '<a class="download shp" href="{name:this.shpUrl}">SHP (ZIP)</a>'  +
             '</span>' +
             '</p>' +
-            '<p><a href="/data/{name}">' + this.dataDetailText + '</a></p>';
+            '<p><a href="/layers/{name}">' + this.dataDetailText + '</a></p>';
 
         var expander = new GeoExplorer.CapabilitiesRowExpander({
             tpl: new Ext.Template(expanderTemplate),

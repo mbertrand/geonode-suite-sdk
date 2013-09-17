@@ -1,9 +1,14 @@
 /**
  * Created with PyCharm.
+
  * User: mbertrand
  * Date: 4/30/12
  * Time: 9:52 AM
  * To change this template use File | Settings | File Templates.
+ */
+
+/**
+ * @requires widgets/GoogleStreetViewPanel.js
  */
 
 /** api: (extends)
@@ -73,7 +78,9 @@ gxp.plugins.StreetViewTool = Ext.extend(gxp.plugins.Tool, {
 	/** api: ptype = gxp_streetviewtool */
 	ptype: "gxp_streetviewtool",
 	
-	toolText: "Google Street View",
+	text: "Google Street View",
+	
+	iconCls: null,
 
 	streetViewTitle: "Google Street View",
 	
@@ -99,7 +106,7 @@ gxp.plugins.StreetViewTool = Ext.extend(gxp.plugins.Tool, {
             {
                 tooltip: this.infoActionTip,
                 iconCls: this.iconCls,
-                text: this.toolText,
+                text: this.text,
                 id: this.id,
                 pressed: false,
                 toggleGroup: this.toggleGroup,

@@ -50,7 +50,6 @@ Ext.namespace("gxp.plugins");
  *        name: "Routes",
  *        layerid: "show:74"
  *    }
->>>>>>> gxpcore/master
  *
  */
 

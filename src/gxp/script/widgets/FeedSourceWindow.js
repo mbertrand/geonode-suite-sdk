@@ -5,7 +5,7 @@
 
 Ext.namespace("gxp");
 
-gxp.FeedSourceDialog = Ext.extend(Ext.Window, {
+gxp.FeedSourceWindow = Ext.extend(Ext.Window, {
 
     addPicasaText: "Picasa Photos",
 

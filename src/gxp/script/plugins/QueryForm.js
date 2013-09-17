@@ -126,6 +126,10 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
      */
     autoExpand: null,
     
+    iconCls: "gxp-icon-find",
+    
+    text: null,
+    
     /** api: method[addActions]
      */
     addActions: function(actions) {
@@ -133,7 +137,8 @@ gxp.plugins.QueryForm = Ext.extend(gxp.plugins.Tool, {
             actions = [{
                 text: this.queryActionText,
                 menuText: this.queryMenuText,
-                iconCls: "gxp-icon-find",
+                iconCls: this.iconCls,
+                text: this.text,
                 tooltip: this.queryActionTip,
                 disabled: true,
                 toggleGroup: this.toggleGroup,

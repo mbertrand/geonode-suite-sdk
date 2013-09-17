@@ -535,7 +535,7 @@ GeoNode.Composer = window.GeoExplorer && Ext.extend(GeoExplorer.Composer, {
                 config.tools[i].catalogSourceKey = catalogSourceKey;
                 config.tools[i].feeds = true;
             }
-            if (config.tools[i].ptype === "gxp_print") {
+            if (config.tools[i].ptype === "gxp_printpage") {
                 config.tools[i].includeLegend = true;
             }
         }
@@ -547,10 +547,7 @@ GeoNode.Composer = window.GeoExplorer && Ext.extend(GeoExplorer.Composer, {
         };
         config.tools.push({
             ptype: 'gn_xhrtrouble'
-        }, {
-            ptype: 'gn_savehyperlink',
-            actionTarget: 'paneltbar'
-        }, {
+        },  {
             ptype: 'gn_save',
             actions: []
         }, {

@@ -3,6 +3,7 @@
  */
 
 /**
+ * @requires widgets/EmbedMapDialog.js
  */
 
 Ext.namespace("gxp");

@@ -6,6 +6,10 @@
  * of the license.
  */
 
+/*
+ * @requires OpenLayers/Layer/Google/v3.js
+ */
+
 /** api: (define)
  *  module = gxp
  *  class = GoogleStreetViewPanel

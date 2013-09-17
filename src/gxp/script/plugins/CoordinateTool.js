@@ -6,6 +6,12 @@
  * of the license.
  */
 
+
+/**
+ * @requires OpenLayers/Layer/Markers.js
+ * @requires widgets/MouseCoordinatesDialog.js
+ */
+
 /** api: (define)
  *  module = gxp.plugins
  *  class = GeoNodeQueryTool

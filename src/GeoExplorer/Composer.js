@@ -136,96 +136,6 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             }, {
                 ptype: "gxp_zoomtolayerextent",
                 actionTarget: {target: "layers.contextMenu", index: 0}
-            }, {
-                ptype: "gxp_googleearth",
-                actionTarget: ["map.tbar", "globe.tbar"]
-            }, {
-                ptype: "gxp_navigation", toggleGroup: "navigation"
-            }, {
-                ptype: "gxp_zoom", toggleGroup: "navigation",
-                showZoomBoxAction: true,
-                controlOptions: {zoomOnClick: false}
-            }, {
-                ptype: "gxp_navigationhistory"
-            }, {
-                ptype: "gxp_zoomtoextent"
-            }, {
-                actions: ["aboutbutton"],  actionTarget: "paneltbar"
-            }, {
-                actions: ["-"], actionTarget: "paneltbar"
-            }, {
-                actions: ["addlayersbutton"],  actionTarget: "paneltbar"
-            }, {
-                actions: ["mapmenu"],  actionTarget: "paneltbar"
-            }, {
-                ptype: "gxp_print",
-                customParams: {outputFilename: 'GeoExplorer-print'},
-                printService: config.printService,
-                actionTarget: "paneltbar",
-                showButtonText: true
-            }, {
-                actions: ["-"],
-                actionTarget: "paneltbar"
-            }, {
-                ptype: "gxp_wmsgetfeatureinfo", format: 'grid',
-                toggleGroup: "interaction",
-                showButtonText: true,
-                actionTarget: "paneltbar"
-            }, {
-                ptype: "gxp_featuremanager",
-                id: "querymanager",
-                selectStyle: {cursor: ''},
-                autoLoadFeatures: true,
-                maxFeatures: 50,
-                paging: true,
-                pagingType: gxp.plugins.FeatureManager.WFS_PAGING
-            }, {
-                ptype: "gxp_queryform",
-                featureManager: "querymanager",
-                autoExpand: "query",
-                actionTarget: "paneltbar",
-                outputTarget: "query"
-            }, {
-                ptype: "gxp_featuregrid",
-                featureManager: "querymanager",
-                showTotalResults: true,
-                autoLoadFeature: false,
-                alwaysDisplayOnMap: true,
-                controlOptions: {multiple: true},
-                displayMode: "selected",
-                outputTarget: "table",
-                outputConfig: {
-                    id: "featuregrid",
-                    columnsSortable: false
-                }
-            }, {
-                ptype: "gxp_zoomtoselectedfeatures",
-                featureManager: "querymanager",
-                actionTarget: ["featuregrid.contextMenu", "featuregrid.bbar"]
-            }, {
-                ptype: "gxp_measure", toggleGroup: "interaction",
-                controlOptions: {immediate: true},
-                showButtonText: true,
-                actionTarget: "paneltbar"
-            }, {
-                ptype: "gxp_featuremanager",
-                id: "featuremanager",
-                maxFeatures: 20,
-                paging: false
-            }, {
-                ptype: "gxp_featureeditor",
-                featureManager: "featuremanager",
-                autoLoadFeature: true,
-                splitButton: true,
-                showButtonText: true,
-                toggleGroup: "interaction",
-                actionTarget: "paneltbar"
-            }, {
-                actions: ["->"],
-                actionTarget: "paneltbar"
-            }, {
-                actions: ["loginbutton"],
-                actionTarget: "paneltbar"
             }
         ];
         
@@ -256,6 +166,24 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 this.doAuthorized(styler.roles, styler.addOutput, styler);
             }, this, {single: true});            
         }
+        
+        var allTools = config.viewerTools || this.viewerTools;
+        var tools = [];
+        var toolConfig;
+        for (var i=0, len=allTools.length; i<len; i++) {
+            var tool = allTools[i];
+            if (tool.checked === true) {
+                var properties = ['checked', 'iconCls', 'id', 'leaf', 'loader', 'text'];
+                for (var key in properties) {
+                    delete tool[properties[key]];
+                }
+                toolConfig = Ext.applyIf({
+                    actionTarget: "paneltbar"
+                }, tool);
+                tools.push(toolConfig);
+            }
+        }
+        config.tools = tools;
     },
 
     /** private: method[setCookieValue]
@@ -488,8 +416,63 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 collapsed: true,
                 hideCollapseTool: true,
                 layout: "fit"
-            }]
+            }],
+            listeners: {
+            	'expand': function() {
+            		var queryManager = Ext.getCmp("querymanager");
+            		var featuregrid = Ext.getCmp("featuregrid");
+            		if (queryManager) {
+            			querymanager.activate();
+            			if (featuregrid) {
+            				queryManager.showLayer(featuregrid.id, featuregrid.displayMode);
+            			}
+            		}
+            	},
+            	'collapse': function() {
+            		var queryManager = Ext.getCmp("querymanager");
+            		var featuregrid = Ext.getCmp("featuregrid");
+            		if (queryManager) {
+            			querymanager.deactivate();
+            			if (featuregrid) {
+            				queryManager.hideLayer(featuregrid.id);
+            			}
+            		}
+            	}
+            }
         });
+        
+        var gridWinPanel = new Ext.Panel({
+            id: 'gridWinPanel',
+            collapseMode: "mini",
+            title: 'Identify Results',
+            region: "west",
+            autoScroll: true,
+            split: true,
+            items: [],
+            width:200
+        });
+
+        var gridResultsPanel = new Ext.Panel({
+            id: 'gridResultsPanel',
+            title: 'Feature Details',
+            region: "center",
+            collapseMode: "mini",
+            autoScroll: true,
+            split: true,
+            items: [],
+            width: 400
+        });
+
+
+        var identifyWindow = new Ext.Window({
+            id: 'queryPanel',
+            layout: "border",
+            closeAction: "hide",
+            items: [gridWinPanel, gridResultsPanel],
+            width: 600,
+            height: 400
+        });
+        
         var toolbar = new Ext.Toolbar({
             disabled: true,
             id: 'paneltbar',
@@ -623,7 +606,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         	}
         	if (addLayers !== null) {
         		addLayers.layerTree = this.layerTree;
-        		if (!this.fromLayer && !this.mapID) {
+        		if (!this.fromLayer && !this.id) {
         			addLayers.showCapabilitiesGrid();
         		}
         	}        
@@ -665,29 +648,14 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         
         new Ext.Button({
             id: "mapmenu",
-            text: this.mapText,
+            text: this.saveMapText,
             iconCls: 'icon-map',
-            menu: new Ext.menu.Menu({
-                items: [{
-                    text: this.exportMapText,
-                    handler: function() {
-                        this.doAuthorized(["ROLE_ADMINISTRATOR"], function() {
-                            this.save(this.showEmbedWindow);
-                        }, this);
-                    },
-                    scope: this,
-                    iconCls: 'icon-export'
-                }, {
-                    text: this.saveMapText,
-                    handler: function() {
+            handler: function() {
                         this.doAuthorized(["ROLE_ADMINISTRATOR"], function() {
                             this.save(this.showUrl);
-                        }, this);
-                    },
-                    scope: this,
-                    iconCls: "icon-save"
-                }]
-            })            
+                        }, this)
+            },
+            scope: this
         });
     },
 
@@ -708,74 +676,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         Ext.get(iframe).on('load', function() { loading.hide(); });
     },
 
-    /** private: method[showEmbedWindow]
-     */
-    showEmbedWindow: function() {
-       var toolsArea = new Ext.tree.TreePanel({title: this.toolsTitle, 
-           autoScroll: true,
-           root: {
-               nodeType: 'async', 
-               expanded: true, 
-               children: this.viewerTools
-           }, 
-           rootVisible: false,
-           id: 'geobuilder-0'
-       });
 
-       var previousNext = function(incr){
-           var l = Ext.getCmp('geobuilder-wizard-panel').getLayout();
-           var i = l.activeItem.id.split('geobuilder-')[1];
-           var next = parseInt(i, 10) + incr;
-           l.setActiveItem(next);
-           Ext.getCmp('wizard-prev').setDisabled(next==0);
-           Ext.getCmp('wizard-next').setDisabled(next==1);
-           if (incr == 1) {
-               this.save();
-           }
-       };
-
-       var embedMap = new gxp.EmbedMapDialog({
-           id: 'geobuilder-1',
-           url: "../viewer/#maps/" + this.id
-       });
-
-       var wizard = {
-           id: 'geobuilder-wizard-panel',
-           border: false,
-           layout: 'card',
-           activeItem: 0,
-           defaults: {border: false, hideMode: 'offsets'},
-           bbar: [{
-               id: 'preview',
-               text: this.previewText,
-               handler: function() {
-                   this.save(this.openPreview.createDelegate(this, [embedMap]));
-               },
-               scope: this
-           }, '->', {
-               id: 'wizard-prev',
-               text: this.backText,
-               handler: previousNext.createDelegate(this, [-1]),
-               scope: this,
-               disabled: true
-           },{
-               id: 'wizard-next',
-               text: this.nextText,
-               handler: previousNext.createDelegate(this, [1]),
-               scope: this
-           }],
-           items: [toolsArea, embedMap]
-       };
-
-       new Ext.Window({
-            layout: 'fit',
-            width: 500, height: 300,
-            title: this.exportMapText,
-            items: [wizard]
-       }).show();
-    },
- 
-    
 
     reloadWorldMapSource : function(layerRecords) {
         var geoEx = this;
@@ -856,10 +757,10 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                        items: [
                            {
                                xtype: "gx_linkembedmapdialog",
-                               linkUrl: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.mapID) + '/' + encodedSnapshotId,
+                               linkUrl: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.id) + '/' + encodedSnapshotId,
                                linkMessage: '<span style="font-size:10pt;">Paste link in email or IM:</span>',
                                publishMessage: '<span style="font-size:10pt;">Paste HTML to embed in website:</span>',
-                               url: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.mapID) + '/' + encodedSnapshotId + "/embed"
+                               url: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.id) + '/' + encodedSnapshotId + "/embed"
                            }
                        ]
                    }).show();
@@ -874,7 +775,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
    },
 
    showHistory: function() {
-       historyWindow = new GeoExplorer.MapSnapshotGrid(this.mapID);
+       historyWindow = new GeoExplorer.MapSnapshotGrid(this.id);
    },
 
    /** private: method[initMetadataForm]
@@ -981,7 +882,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
            Ext.Ajax.request({
                url: "/maputils/checkurl/",
                method: 'POST',
-               params : {query:urlField.getValue(), mapid: geoEx.mapID},
+               params : {query:urlField.getValue(), mapid: geoEx.id},
                success: function(response, options) {
                    var urlcount = Ext.decode(response.responseText).count;
                    var rt = "";
@@ -1147,14 +1048,13 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
            id: 'worldmap_update_panel',
            title: 'Upload Layer',
            header: false,
-           autoLoad: {url: '/data/upload/?tab=true', scripts: true},
+           autoLoad: {url: '/upload/tab', scripts: true},
            listeners:{
                activate : function(panel) {
-                   panel.getUpdater().refresh();
+                   //panel.getUpdater().refresh();
                }
            },
-           renderTo: 'uploadDiv',
-           autoScroll: true
+           renderTo: 'uploadDiv'
        });
 
    },
@@ -1164,7 +1064,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
            id: 'worldmap_create_panel',
            title: 'Create Layer',
            header: false,
-           autoLoad: {url: '/data/create_pg_layer/?tab=true', scripts: true},
+           autoLoad: {url: '/layers/create_pg_layer/?tab=true', scripts: true},
            listeners:{
                activate : function(panel) {
                    panel.getUpdater().refresh();
@@ -1205,9 +1105,9 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                this.capGrid
            ]
        });
-       if (this.config["edit_map"] && Ext.get("uploadDiv")) {
+       if (Ext.get("uploadDiv")) {
            this.dataTabPanel.add(this.uploadPanel);
-           if (this.config["db_datastore"]) {
+           if (false && this.config["db_datastore"]) {
                this.dataTabPanel.add(this.createPanel);
            }
        }
@@ -1287,11 +1187,11 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
 
 
        var addLocalLayers = function() {
-           if (!this.mapID) {
+           if (!this.id) {
                Ext.Msg.alert("Save your Map View", "You must save this map view before uploading your data");
            }
            else
-               document.location.href = "/data/upload?map=" + this.mapID;
+               document.location.href = "/layers/upload?map=" + this.id;
        };
 
 
@@ -1528,11 +1428,11 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             this.initCapGrid();
         }
 
-        if (!this.uploadPanel && this.config["edit_map"] && Ext.get("uploadDiv")) {
+        if (!this.uploadPanel && Ext.get("uploadDiv")) {
             this.initUploadPanel();
         }
 
-        if (!this.createPanel && this.config["edit_map"] && this.config["db_datastore"] === true) {
+        if (false && !this.createPanel && this.config["db_datastore"] === true) {
             this.initCreatePanel();
         }
 
@@ -1649,7 +1549,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
 
     updateURL: function() {
         /* PUT to this url to update an existing map */
-        return this.rest + this.mapID + '/data';
+        return this.rest + this.id + '/data';
     },
   
     
@@ -1853,7 +1753,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 jsonData: config,
                 success: function(response, options) {
                     /* nothing for now */
-                    this.fireEvent("saved", this.mapID);
+                    this.fireEvent("saved", this.id);
                     this.metadataForm.hide();
                     Ext.getCmp('gx_saveButton').enable();
                     //Ext.getCmp('gx_saveAsButton').enable();

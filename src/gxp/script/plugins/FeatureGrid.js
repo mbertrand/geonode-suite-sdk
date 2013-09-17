@@ -269,7 +269,7 @@ gxp.plugins.FeatureGrid = Ext.extend(gxp.plugins.ClickableFeatures, {
                             onPopulate.call(this);
                         } else {
                             onClear.call(this);
-                        }
+                        }      
                     },
                     "layerchange": onClear,
                     "clearfeatures": onClear,

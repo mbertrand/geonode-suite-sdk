@@ -37,7 +37,7 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
 
         var incrementLayerStats = function(layer) {
             Ext.Ajax.request({
-                url: "/data/layerstats/",
+                url: "/layers/layerstats/",
                 method: "POST",
                 params: {layername:layer.params.LAYERS}
             });
