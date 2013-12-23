@@ -14,7 +14,7 @@
         <echo message=" deploy     --&gt; deploy an existing application"/>
     </target>
 
-    <property name="sdk.home" location="opengeosuite-3.0.1-sdk"/>
+    <property name="sdk.home" location="../opengeosuite-4.0-sdk"/>
     <property name="app.proxy.geoserver" value=""/>
     <property name="app.port" value="9080"/>
     <property name="suite.domain" value="localhost"/>
@@ -22,8 +22,8 @@
     <property name="suite.container" value="tomcat6x"/>
     <property name="suite.username" value="manager"/>
     <property name="suite.password" value="geoserver"/>
-    <property name="sdk.build" location="${java.io.tmpdir}/suite-sdk/build"/>
-    <property name="sdk.logfile" location="${java.io.tmpdir}/suite-sdk/error.log"/>
+    <property name="sdk.build" location="build"/>
+    <property name="sdk.logfile" location="error.log"/>
 
     <target name="version">
         <property file="${sdk.home}/version.ini"/>
