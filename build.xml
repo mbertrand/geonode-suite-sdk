@@ -14,7 +14,7 @@
         <echo message=" deploy     --&gt; deploy an existing application"/>
     </target>
 
-    <property name="sdk.home" location="../opengeosuite-3.0.1-sdk"/>
+    <property name="sdk.home" location="opengeosuite-3.0.1-sdk"/>
     <property name="app.proxy.geoserver" value=""/>
     <property name="app.port" value="9080"/>
     <property name="suite.domain" value="localhost"/>
