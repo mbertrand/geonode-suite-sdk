@@ -64,6 +64,8 @@
  * @require GeoExplorer.js
  * @require Composer.js
  * @require Viewer.js
+ * @require ViewerMobile.js
+ * @require ViewerPrint.js
  * @require GeoNode-mixin.js
  * @require GeoNode-GeoExplorer.js
  * 

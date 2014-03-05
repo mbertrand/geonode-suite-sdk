@@ -99,14 +99,6 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                     autoScroll: true
                 },
                 outputTarget: "tree"
-            }, {
-                ptype: "gxp_addlayers",
-                actionTarget: "layers.tbar",
-                outputTarget: "tree",
-                uploadSource: "local",
-                postUploadAction: {
-                    plugin: "styler"
-                }
             },
             {
                 ptype: "gxp_addcategory",
@@ -120,18 +112,18 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             },            
             {
                 ptype: "gxp_removelayer",
-                actionTarget: ["layers.tbar", "layers.contextMenu"]
+                actionTarget: ["layers.contextMenu"]
             }, {
                 ptype: "gxp_layerproperties",
                 id: "layerproperties",
                 outputConfig: {defaults: {autoScroll: true}, width: 320},
-                actionTarget: ["layers.tbar", "layers.contextMenu"],
+                actionTarget: ["layers.contextMenu"],
                 outputTarget: "tree"
             }, {
                 ptype: "gxp_styler",
                 id: "styler",
                 outputConfig: {autoScroll: true, width: 320},
-                actionTarget: ["layers.tbar", "layers.contextMenu"],
+                actionTarget: ["layers.contextMenu"],
                 outputTarget: "tree"
             }, {
                 ptype: "gxp_zoomtolayerextent",
@@ -1575,7 +1567,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
     getCategoryTitle: function(record){
         var subject = this.defaultTopic || "General";
         try {
-            subject = record.get("subject")[0];
+            subject = record.get("category");
         } catch (ex) {
             return subject;
         }
@@ -1625,7 +1617,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 };
 
                 var record = source.createLayerRecord(layerConfig);
-                record.set("group", this.getCategoryTitle(thisRecord.get("subject")));
+                record.set("group", this.getCategoryTitle(thisRecord));
                 if (this.layerTree) {
                     this.layerTree.addCategoryFolder({"group":record.get("group")});
                 }

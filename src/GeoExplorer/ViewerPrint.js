@@ -42,20 +42,24 @@ GeoExplorer.ViewerPrint = Ext.extend(GeoExplorer.Viewer, {
     initPortal: function() {
 
         // TODO: make a proper component out of this
-        if (this.useMapOverlay !== false) {
-            this.mapPanel.add(this.createMapOverlay());
-        }
 
-        if(this.useToolbar !== false) {
+
+
             this.toolbar = new Ext.Toolbar({
                 xtype: "toolbar",
                 region: "north",
                 autoHeight: true,
                 disabled: true,
+                id: "paneltbar",
                 items: this.createTools()
             });
-            this.on("ready", function() {this.toolbar.enable();}, this);
-        }
+            this.on("ready", function() {
+                if (this.useToolbar)
+                    this.toolbar.enable();
+                else
+                    this.toolbar.hide();
+            }, this);
+
 
         this.mapPanelContainer = new Ext.Panel({
             layout: "card",
