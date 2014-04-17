@@ -641,7 +641,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         new Ext.Button({
             id: "mapmenu",
             text: this.saveMapText,
-            iconCls: 'icon-map',
+            iconCls: null,
             handler: function() {
                         this.doAuthorized(["ROLE_ADMINISTRATOR"], function() {
                             this.save(this.showUrl);
@@ -1402,7 +1402,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             permalinkURL: '/search/api/data',
             searchURL: '/search/api/data',
             constraints: [this.bbox],
-            searchParams: {'limit':10, 'bbox': llbounds.toBBOX()},
+            searchParams: {'limit':10, 'bbox': llbounds.toBBOX(), 'type': 'layer'},
             searchOnLoad: false
         });
 
