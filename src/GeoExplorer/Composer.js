@@ -686,6 +686,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 this.localGeoServerBaseUrl.replace(
                     this.urlPortRegEx, "$1/")) === 0) {
                 this.worldMapSourceKey = id;
+                break;
             }
         }
 
@@ -1042,8 +1043,8 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
            header: false,
            autoLoad: {url: '/upload/tab', scripts: true},
            listeners:{
-               activate : function(panel) {
-                   //panel.getUpdater().refresh();
+               activate : function(panel){
+                   panel.getUpdater().refresh();
                }
            },
            renderTo: 'uploadDiv'
@@ -1249,16 +1250,77 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
            }
        });
 
+       var newSourceDialog = {
+           xtype: "gxp_newsourcedialog",
+           header: false,
+           listeners: {
+               "hide": function(cmp) {
+                   if (!this.outputTarget) {
+                       cmp.ownerCt.hide();
+                   }
+               },
+               "urlselected": function(newSourceDialog, url, type) {
+                   newSourceDialog.setLoading();
+                   var ptype;
+                   switch (type) {
+                       case 'TMS':
+                           ptype = "gxp_tmssource";
+                           break;
+                       case 'REST':
+                           ptype = 'gxp_arcrestsource';
+                           break;
+                       default:
+                           ptype = 'gxp_wmscsource';
+                   }
+                   app.addLayerSource({
+                       config: {url: url, ptype: ptype, forceLoad: true},
+                       callback: function(id) {
+                           // add to combo and select
+                           var record = new sources.recordType({
+                               id: id,
+                               title: app.layerSources[id].title || "Untitled" // TODO: titles
+                           });
+                           sources.insert(0, [record]);
+                           sourceComboBox.onSelect(record, 0);
+                           newSourceDialog.hide();
+                           Ext.Ajax.request({
+                               url: "/services/registerbytype/",
+                               method: 'POST',
+                               params: {url: url, type: type},
+                               failure: function(response, options) {
+                                   //do nothing, silent fail
+                               }
+                           });
+                       },
+                       fallback: function(source,msg) {
+                           // TODO: wire up success/failure
+                           newSourceDialog.setError(
+                               new Ext.Template(newSourceDialog.addLayerSourceErrorText).apply({type: type, msg: msg})
+                           );
+                           app.busyMask.hide();
+                       },
+                       scope: app
+                   });
+               },
+               scope: app
+           }
+       };
+
 
        var addWmsButton = new Ext.Button({
            text: this.layerAdditionLabel,
            iconCls: 'icon-add',
            cls: 'x-btn-link-medium x-btn-text',
            handler: function() {
-               newSourceWindow.show();
+               new Ext.Window({
+                   title: gxp.NewSourceDialog.prototype.title,
+                   modal: true,
+                   hideBorders: true,
+                   width: 300,
+                   items: newSourceDialog
+               }).show();
            }
        });
-
 
        var addFeedButton = new Ext.Button({
            text: this.feedAdditionLabel,
@@ -1613,7 +1675,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 		source: dataSource.id,
                 		name: thisRecord.get("name"),
                 		title: thisRecord.get("title"),
-                		url: this.localGeoServerBaseUrl + "/wms"
+                		url: this.localGeoServerBaseUrl + "wms"
                 };
 
                 var record = source.createLayerRecord(layerConfig);
