@@ -53,6 +53,7 @@
  * @require plugins/MapRevisionTool.js
  * @require plugins/TMSSource.js
  * @require plugins/StamenSource.js
+ * @require plugins/GazetteerTool.js
  * @require widgets/WMSLayerPanel.js
  * @require widgets/FeedSourceWindow.js
  * @require widgets/SearchBar.js
