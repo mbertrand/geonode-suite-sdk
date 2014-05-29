@@ -521,7 +521,7 @@ GeoNode.Composer = window.GeoExplorer && Ext.extend(GeoExplorer.Composer, {
         var catalogSourceKey, key;
         for (key in config.sources) {
             var source = config.sources[key];
-            if (source.ptype === "gxp_wmscsource" && source.restUrl) {
+            if (source.ptype === "gxp_gnsource" && source.restUrl) {
                 catalogSourceKey = key;
                 break;
             }

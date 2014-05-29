@@ -45,7 +45,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
     logoutText: "Logout, {user}",
     loginErrorText: "Invalid username or password.",
     userFieldText: "User",
-    passwordFieldText: "Password", 
+    passwordFieldText: "Password",
     tableText: "Table",
     queryText: "Query",
     logoutConfirmTitle: "Warning",
@@ -53,7 +53,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
     // End i18n.
 
     constructor: function(config) {
-    	this.config = config;
+        this.config = config;
         // Starting with this.authorizedRoles being undefined, which means no
         // authentication service is available
         if (config.authStatus === 401) {
@@ -88,8 +88,8 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 ['transportation', 'Transportation'],
                 ['utilitiesCommunications', 'Utilities/Communications']
             ];
-        
-        
+
+
         config.tools = [
             {
                 ptype: "gxp_layermanager",
@@ -109,7 +109,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             },{
                 ptype: "gxp_removecategory",
                 actionTarget: ["layers.contextMenu"]
-            },            
+            },
             {
                 ptype: "gxp_removelayer",
                 actionTarget: ["layers.contextMenu"]
@@ -130,13 +130,13 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 actionTarget: {target: "layers.contextMenu", index: 0}
             }
         ];
-        
+
         GeoExplorer.Composer.superclass.constructor.apply(this, arguments);
     },
-    
+
     loadConfig: function(config) {
         GeoExplorer.Composer.superclass.loadConfig.apply(this, arguments);
-        
+
         var query = Ext.urlDecode(document.location.search.substr(1));
         if (query && query.styler) {
             for (var i=config.map.layers.length-1; i>=0; --i) {
@@ -156,9 +156,9 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                     this.mapPanel.map.zoomToExtent(extent);
                 }
                 this.doAuthorized(styler.roles, styler.addOutput, styler);
-            }, this, {single: true});            
+            }, this, {single: true});
         }
-        
+
         var allTools = config.viewerTools || this.viewerTools;
         var tools = [];
         var toolConfig;
@@ -219,8 +219,8 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             window.location.reload();
         };
         Ext.Msg.show({
-            title: this.logoutConfirmTitle, 
-            msg: this.logoutConfirmMessage, 
+            title: this.logoutConfirmTitle,
+            msg: this.logoutConfirmMessage,
             buttons: Ext.Msg.YESNOCANCEL,
             icon: Ext.MessageBox.WARNING,
             fn: function(btn) {
@@ -284,8 +284,8 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 handler: submitLogin,
                 scope: this
             }],
-            keys: [{ 
-                key: [Ext.EventObject.ENTER], 
+            keys: [{
+                key: [Ext.EventObject.ENTER],
                 handler: submitLogin,
                 scope: this
             }]
@@ -318,7 +318,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 scope: this
             });
         }
-                
+
         var win = new Ext.Window({
             title: this.loginText,
             layout: "fit",
@@ -369,7 +369,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
      * Create the various parts that compose the layout.
      */
     initPortal: function() {
-        
+
         var westPanel = new gxp.CrumbPanel({
             id: "tree",
             region: "west",
@@ -410,29 +410,29 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 layout: "fit"
             }],
             listeners: {
-            	'expand': function() {
-            		var queryManager = Ext.getCmp("querymanager");
-            		var featuregrid = Ext.getCmp("featuregrid");
-            		if (queryManager) {
-            			querymanager.activate();
-            			if (featuregrid) {
-            				queryManager.showLayer(featuregrid.id, featuregrid.displayMode);
-            			}
-            		}
-            	},
-            	'collapse': function() {
-            		var queryManager = Ext.getCmp("querymanager");
-            		var featuregrid = Ext.getCmp("featuregrid");
-            		if (queryManager) {
-            			querymanager.deactivate();
-            			if (featuregrid) {
-            				queryManager.hideLayer(featuregrid.id);
-            			}
-            		}
-            	}
+                'expand': function() {
+                    var queryManager = Ext.getCmp("querymanager");
+                    var featuregrid = Ext.getCmp("featuregrid");
+                    if (queryManager) {
+                        querymanager.activate();
+                        if (featuregrid) {
+                            queryManager.showLayer(featuregrid.id, featuregrid.displayMode);
+                        }
+                    }
+                },
+                'collapse': function() {
+                    var queryManager = Ext.getCmp("querymanager");
+                    var featuregrid = Ext.getCmp("featuregrid");
+                    if (queryManager) {
+                        querymanager.deactivate();
+                        if (featuregrid) {
+                            queryManager.hideLayer(featuregrid.id);
+                        }
+                    }
+                }
             }
         });
-        
+
         var gridWinPanel = new Ext.Panel({
             id: 'gridWinPanel',
             collapseMode: "mini",
@@ -464,7 +464,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             width: 600,
             height: 400
         });
-        
+
         var toolbar = new Ext.Toolbar({
             disabled: true,
             id: 'paneltbar',
@@ -492,7 +492,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 }
             }
         });
-        
+
         // TODO: continue making this Google Earth Panel more independent
         // Currently, it's too tightly tied into the viewer.
         // In the meantime, we keep track of all items that the were already
@@ -529,7 +529,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         googleEarthPanel.on("hide", function() {
             // re-enable all tools
             toolbar.enable();
-            
+
             var layersContainer = Ext.getCmp("tree");
             var layersToolbar = layersContainer && layersContainer.getTopToolbar();
             if (layersToolbar) {
@@ -554,7 +554,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             ],
             activeItem: 0
         });
-        
+
         this.portalItems = [{
             region: "center",
             layout: "border",
@@ -565,11 +565,11 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 southPanel
             ]
         }];
-        
+
 
 
         this.on("ready", function() {
-        	
+
             //If there are feeds on the map, there will be a SelectFeature control.
             //Activate it now.
             if (this.selectControl)
@@ -581,31 +581,31 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 if (source instanceof gxp.plugins.CatalogueSource)  {
                     startSourceId = id;
                 }
-            }        	
-        	
-        	var addLayers = null;
-        	for (var key in this.tools) {
-        		var tool = this.tools[key];
-        		if (tool.ptype === "gxp_addlayers") {
-        			addLayers = tool;
-        			addLayers.startSourceId = startSourceId;
-        			addLayers.catalogSourceKey = startSourceId;
-        		} else if (tool.ptype == "gxp_layermanager") {
-        			this.layerTree = tool;
-        			this.fireEvent("setLayerTree");
+            }
+
+            var addLayers = null;
+            for (var key in this.tools) {
+                var tool = this.tools[key];
+                if (tool.ptype === "gxp_addlayers") {
+                    addLayers = tool;
+                    addLayers.startSourceId = startSourceId;
+                    addLayers.catalogSourceKey = startSourceId;
+                } else if (tool.ptype == "gxp_layermanager") {
+                    this.layerTree = tool;
+                    this.fireEvent("setLayerTree");
                     this.addInfo();
-        		}
-        	}
-        	if (addLayers !== null) {
-        		addLayers.layerTree = this.layerTree;
-        		if (!this.fromLayer && !this.id) {
-        			addLayers.showCapabilitiesGrid();
-        		}
-        	}        
+                }
+            }
+            if (addLayers !== null) {
+                addLayers.layerTree = this.layerTree;
+                if (!this.fromLayer && !this.id) {
+                    addLayers.showCapabilitiesGrid();
+                }
+            }
         }, this);
-        GeoExplorer.Composer.superclass.initPortal.apply(this, arguments);   
+        GeoExplorer.Composer.superclass.initPortal.apply(this, arguments);
     },
-    
+
     /**
      * api: method[createTools]
      * Create the toolbar configuration for the main view.
@@ -627,25 +627,25 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 this.showLogout(user);
             }
         }
-        
+
         new Ext.Button({
-        	id: "addlayersbutton",
+            id: "addlayersbutton",
             tooltip : this.addLayersButtonText,
             disabled: false,
             text: '<span class="x-btn-text">' + this.addLayersButtonText + '</span>',
             handler : this.showSearchWindow,
             scope: this
         });
-                
-        
+
+
         new Ext.Button({
             id: "mapmenu",
             text: this.saveMapText,
             iconCls: null,
             handler: function() {
-                        this.doAuthorized(["ROLE_ADMINISTRATOR"], function() {
-                            this.save(this.showUrl);
-                        }, this)
+                this.doAuthorized(["ROLE_ADMINISTRATOR"], function() {
+                    this.save(this.showUrl);
+                }, this)
             },
             scope: this
         });
@@ -714,374 +714,374 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         if (wmSource) {
             this.addLayerAjax(wmSource, this.worldMapSourceKey, records);
         }
-    },    
-    
-    
+    },
+
+
     /** private: method[makeExportDialog]
-    *
-    * Create a dialog providing the HTML snippet to use for embedding the
-    * (persisted) map, etc.
-    */
-   makeExportDialog: function() {
+     *
+     * Create a dialog providing the HTML snippet to use for embedding the
+     * (persisted) map, etc.
+     */
+    makeExportDialog: function() {
 
-       var mapConfig = this.getState();
-       var treeConfig = [];
-       for (x = 0,max = this.layerTree.overlayRoot.childNodes.length; x < max; x++) {
-           node = this.layerTree.overlayRoot.childNodes[x];
-           treeConfig.push({group : node.text, expanded:  node.expanded.toString()  });
-       }
-
-
-       mapConfig.map['groups'] = treeConfig;
+        var mapConfig = this.getState();
+        var treeConfig = [];
+        for (x = 0,max = this.layerTree.overlayRoot.childNodes.length; x < max; x++) {
+            node = this.layerTree.overlayRoot.childNodes[x];
+            treeConfig.push({group : node.text, expanded:  node.expanded.toString()  });
+        }
 
 
-       Ext.Ajax.request({
-           url: "/maps/snapshot/create",
-           method: 'POST',
-           jsonData: mapConfig,
-           success: function(response, options) {
-               var encodedSnapshotId = response.responseText;
-               if (encodedSnapshotId != null) {
-                   new Ext.Window({
-                       title: this.publishActionText,
-                       layout: "fit",
-                       width: 380,
-                       autoHeight: true,
-                       items: [
-                           {
-                               xtype: "gx_linkembedmapdialog",
-                               linkUrl: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.id) + '/' + encodedSnapshotId,
-                               linkMessage: '<span style="font-size:10pt;">Paste link in email or IM:</span>',
-                               publishMessage: '<span style="font-size:10pt;">Paste HTML to embed in website:</span>',
-                               url: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.id) + '/' + encodedSnapshotId + "/embed"
-                           }
-                       ]
-                   }).show();
-               }
-           },
-           failure: function(response, options) {
-               return false;
-               Ext.Msg.alert('Error', response.responseText, this.showMetadataForm);
-           },
-           scope: this
-       });
-   },
-
-   showHistory: function() {
-       historyWindow = new GeoExplorer.MapSnapshotGrid(this.id);
-   },
-
-   /** private: method[initMetadataForm]
-    *
-    * Initialize metadata entry form.
-    */
-   initMetadataForm: function() {
-
-       var geoEx = this;
-
-       var titleField = new Ext.form.TextField({
-           width: '95%',
-           fieldLabel: this.metaDataMapTitle,
-           value: this.about.title,
-           allowBlank: false,
-           enableKeyEvents: true,
-           listeners: {
-               "valid": function() {
-                   if (urlField.isValid()) {
-                       //saveAsButton.enable();
-                       saveButton.enable();
-                   }
-               },
-               "invalid": function() {
-                   //saveAsButton.disable();
-                   saveButton.disable();
-               }
-           }
-       });
-
-       //Make sure URL is not taken; if it is, show list of taken url's that start with field value
-       Ext.apply(Ext.form.VTypes, {
-           UniqueMapId : this.target.id,
-           UniqueUrl: function(value, field) {
-
-               var allowedChars = value.match(/^(\w+[-]*)+$/g);
-               if (!allowedChars) {
-                   this.UniqueUrlText = "URL's can only contain letters, numbers, dashes & underscores."
-                   return false;
-               }
-
-               Ext.Ajax.request({
-                   url: "/maputils/checkurl/",
-                   method: 'POST',
-                   params : {query:value, mapid: this.UniqueMapId},
-                   success: function(response, options) {
-                       var urlcount = Ext.decode(response.responseText).count;
-                       if (urlcount > 0) {
-                           this.UniqueUrlText = "The following URL's are already taken:";
-                           var urls = Ext.decode(response.responseText).urls;
-                           var isValid = true;
-                           for (var u in urls) {
-                               if (urls[u].url != undefined && urls[u].url != null)
-                                   this.UniqueUrlText += "<br/>" + urls[u].url;
-                               if (urls[u].url == value) {
-                                   isValid = false;
-                               }
-
-                           }
-                           if (!isValid)
-                               field.markInvalid(this.UniqueUrlText);
-                       }
-                   },
-                   failure: function(response, options) {
-                       return false;
-                       Ext.Msg.alert('Error', response.responseText, this.showMetadataForm);
-                   },
-                   scope: this
-               });
-               return true;
-           },
-
-           UniqueUrlText: "The following URL's are already taken, please choose another"
-       });
-
-       var urlField = new Ext.form.TextField({
-           width:'30%',
-           fieldLabel: this.metaDataMapUrl + "<br/><span style='font-style:italic;'>http://" + document.location.hostname + "/maps/</span>",
-           labelSeparator:'',
-           enableKeyEvents: true,
-           validationEvent: 'onblur',
-           vtype: 'UniqueUrl',
-           itemCls:'x-form-field-inline',
-           ctCls:'x-form-field-inline',
-           value: this.target.about["urlsuffix"],
-           listeners: {
-               "valid": function() {
-                   if (titleField.isValid()) {
-                       //saveAsButton.enable();
-                       saveButton.enable();
-                   }
-               },
-               "invalid": function() {
-                   //saveAsButton.disable();
-                   saveButton.disable();
-               }
-           }
-       });
-
-       var checkUrlBeforeSave = function(as) {
-           Ext.getCmp('gx_saveButton').disable();
-           //Ext.getCmp('gx_saveAsButton').disable();
-
-           Ext.Ajax.request({
-               url: "/maputils/checkurl/",
-               method: 'POST',
-               params : {query:urlField.getValue(), mapid: geoEx.id},
-               success: function(response, options) {
-                   var urlcount = Ext.decode(response.responseText).count;
-                   var rt = "";
-                   var isValid = true;
-                   if (urlcount > 0) {
-                       rt = "The following URL's are already taken:";
-                       var urls = Ext.decode(response.responseText).urls;
-
-                       for (var u in urls) {
-                           if (urls[u].url != undefined && urls[u].url != null)
-                               rt += "<br/>" + urls[u].url;
-                           if (urls[u].url == urlField.getValue()) {
-                               isValid = false;
-                           }
-
-                       }
-                       if (!isValid) {
-                           urlField.markInvalid(rt);
-                           Ext.getCmp('gx_saveButton').enable();
-                           //Ext.getCmp('gx_saveAsButton').enable();
-                           return false;
-                       }
-
-                   }
-                   if (isValid) {
-                       geoEx.about.title = titleField.getValue();
-                       geoEx.about["abstract"] = abstractField.getValue();
-                       geoEx.about["urlsuffix"] = urlField.getValue();
-                       geoEx.about["introtext"] = nicEditors.findEditor('intro_text_area').getContent();
-                       geoEx.saveMap(as);
-                       geoEx.initInfoTextWindow();
-                   }
-               },
-               failure: function(response, options) {
-                   Ext.getCmp('gx_saveButton').enable();
-                   //Ext.getCmp('gx_saveAsButton').enable();
-                   return false;
-                   //Ext.Msg.alert('Error', response.responseText, geoEx.showMetadataForm);
-               },
-               scope: this
-           });
-       };
-
-       var abstractField = new Ext.form.TextArea({
-           width: '95%',
-           height: 50,
-           fieldLabel: this.metaDataMapAbstract,
-           value: this.about["abstract"]
-       });
+        mapConfig.map['groups'] = treeConfig;
 
 
-       var introTextField = new Ext.form.TextArea({
-           width: 550,
-           height: 200,
-           fieldLabel: this.metaDataMapIntroText,
-           id: "intro_text_area",
-           value: this.about["introtext"]
-       });
+        Ext.Ajax.request({
+            url: "/maps/snapshot/create",
+            method: 'POST',
+            jsonData: mapConfig,
+            success: function(response, options) {
+                var encodedSnapshotId = response.responseText;
+                if (encodedSnapshotId != null) {
+                    new Ext.Window({
+                        title: this.publishActionText,
+                        layout: "fit",
+                        width: 380,
+                        autoHeight: true,
+                        items: [
+                            {
+                                xtype: "gx_linkembedmapdialog",
+                                linkUrl: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.id) + '/' + encodedSnapshotId,
+                                linkMessage: '<span style="font-size:10pt;">Paste link in email or IM:</span>',
+                                publishMessage: '<span style="font-size:10pt;">Paste HTML to embed in website:</span>',
+                                url: this.rest + (this.about["urlsuffix"] ? this.about["urlsuffix"] : this.id) + '/' + encodedSnapshotId + "/embed"
+                            }
+                        ]
+                    }).show();
+                }
+            },
+            failure: function(response, options) {
+                return false;
+                Ext.Msg.alert('Error', response.responseText, this.showMetadataForm);
+            },
+            scope: this
+        });
+    },
+
+    showHistory: function() {
+        historyWindow = new GeoExplorer.MapSnapshotGrid(this.id);
+    },
+
+    /** private: method[initMetadataForm]
+     *
+     * Initialize metadata entry form.
+     */
+    initMetadataForm: function() {
+
+        var geoEx = this;
+
+        var titleField = new Ext.form.TextField({
+            width: '95%',
+            fieldLabel: this.metaDataMapTitle,
+            value: this.about.title,
+            allowBlank: false,
+            enableKeyEvents: true,
+            listeners: {
+                "valid": function() {
+                    if (urlField.isValid()) {
+                        //saveAsButton.enable();
+                        saveButton.enable();
+                    }
+                },
+                "invalid": function() {
+                    //saveAsButton.disable();
+                    saveButton.disable();
+                }
+            }
+        });
+
+        //Make sure URL is not taken; if it is, show list of taken url's that start with field value
+        Ext.apply(Ext.form.VTypes, {
+            UniqueMapId : this.target.id,
+            UniqueUrl: function(value, field) {
+
+                var allowedChars = value.match(/^(\w+[-]*)+$/g);
+                if (!allowedChars) {
+                    this.UniqueUrlText = "URL's can only contain letters, numbers, dashes & underscores."
+                    return false;
+                }
+
+                Ext.Ajax.request({
+                    url: "/maputils/checkurl/",
+                    method: 'POST',
+                    params : {query:value, mapid: this.UniqueMapId},
+                    success: function(response, options) {
+                        var urlcount = Ext.decode(response.responseText).count;
+                        if (urlcount > 0) {
+                            this.UniqueUrlText = "The following URL's are already taken:";
+                            var urls = Ext.decode(response.responseText).urls;
+                            var isValid = true;
+                            for (var u in urls) {
+                                if (urls[u].url != undefined && urls[u].url != null)
+                                    this.UniqueUrlText += "<br/>" + urls[u].url;
+                                if (urls[u].url == value) {
+                                    isValid = false;
+                                }
+
+                            }
+                            if (!isValid)
+                                field.markInvalid(this.UniqueUrlText);
+                        }
+                    },
+                    failure: function(response, options) {
+                        return false;
+                        Ext.Msg.alert('Error', response.responseText, this.showMetadataForm);
+                    },
+                    scope: this
+                });
+                return true;
+            },
+
+            UniqueUrlText: "The following URL's are already taken, please choose another"
+        });
+
+        var urlField = new Ext.form.TextField({
+            width:'30%',
+            fieldLabel: this.metaDataMapUrl + "<br/><span style='font-style:italic;'>http://" + document.location.hostname + "/maps/</span>",
+            labelSeparator:'',
+            enableKeyEvents: true,
+            validationEvent: 'onblur',
+            vtype: 'UniqueUrl',
+            itemCls:'x-form-field-inline',
+            ctCls:'x-form-field-inline',
+            value: this.target.about["urlsuffix"],
+            listeners: {
+                "valid": function() {
+                    if (titleField.isValid()) {
+                        //saveAsButton.enable();
+                        saveButton.enable();
+                    }
+                },
+                "invalid": function() {
+                    //saveAsButton.disable();
+                    saveButton.disable();
+                }
+            }
+        });
+
+        var checkUrlBeforeSave = function(as) {
+            Ext.getCmp('gx_saveButton').disable();
+            //Ext.getCmp('gx_saveAsButton').disable();
+
+            Ext.Ajax.request({
+                url: "/maputils/checkurl/",
+                method: 'POST',
+                params : {query:urlField.getValue(), mapid: geoEx.id},
+                success: function(response, options) {
+                    var urlcount = Ext.decode(response.responseText).count;
+                    var rt = "";
+                    var isValid = true;
+                    if (urlcount > 0) {
+                        rt = "The following URL's are already taken:";
+                        var urls = Ext.decode(response.responseText).urls;
+
+                        for (var u in urls) {
+                            if (urls[u].url != undefined && urls[u].url != null)
+                                rt += "<br/>" + urls[u].url;
+                            if (urls[u].url == urlField.getValue()) {
+                                isValid = false;
+                            }
+
+                        }
+                        if (!isValid) {
+                            urlField.markInvalid(rt);
+                            Ext.getCmp('gx_saveButton').enable();
+                            //Ext.getCmp('gx_saveAsButton').enable();
+                            return false;
+                        }
+
+                    }
+                    if (isValid) {
+                        geoEx.about.title = titleField.getValue();
+                        geoEx.about["abstract"] = abstractField.getValue();
+                        geoEx.about["urlsuffix"] = urlField.getValue();
+                        geoEx.about["introtext"] = nicEditors.findEditor('intro_text_area').getContent();
+                        geoEx.saveMap(as);
+                        geoEx.initInfoTextWindow();
+                    }
+                },
+                failure: function(response, options) {
+                    Ext.getCmp('gx_saveButton').enable();
+                    //Ext.getCmp('gx_saveAsButton').enable();
+                    return false;
+                    //Ext.Msg.alert('Error', response.responseText, geoEx.showMetadataForm);
+                },
+                scope: this
+            });
+        };
+
+        var abstractField = new Ext.form.TextArea({
+            width: '95%',
+            height: 50,
+            fieldLabel: this.metaDataMapAbstract,
+            value: this.about["abstract"]
+        });
 
 
-       var metaDataPanel = new Ext.FormPanel({
-           bodyStyle: {padding: "5px"},
-           labelAlign: "top",
-           items: [
-               titleField,
-               urlField,
-               abstractField,
-               introTextField
-           ]
-       });
-
-       metaDataPanel.enable();
-
-       var saveButton = new Ext.Button({
-           id: 'gx_saveButton',
-           text: this.metadataFormSaveText,
-           cls:'x-btn-text',
-           disabled: !this.about.title,
-           handler: function(e) {
-               checkUrlBeforeSave(false);
-           },
-           scope: this
-       });
-
-       this.metadataForm = new Ext.Window({
-           title: this.metaDataHeader,
-           closeAction: 'hide',
-           items: metaDataPanel,
-           modal: true,
-           width: 600,
-           autoHeight: true,
-           bbar: [
-               "->",
-               //saveAsButton,
-               saveButton,
-               new Ext.Button({
-                   text: this.metadataFormCancelText,
-                   cls:'x-btn-text',
-                   handler: function() {
-                       titleField.setValue(this.about.title);
-                       abstractField.setValue(this.about["abstract"]);
-                       urlField.setValue(this.about["urlsuffix"]);
-                       introTextField.setValue(this.about["introtext"]);
-                       this.metadataForm.hide();
-                   },
-                   scope: this
-               })
-           ]
-       });
-
-   },
-
-   initInfoTextWindow: function() {
-       this.infoTextPanel = new Ext.FormPanel({
-           bodyStyle: {padding: "5px"},
-           labelAlign: "top",
-           preventBodyReset: true,
-           autoScroll:false,
-           html: this.about['introtext']
-       });
-
-       this.infoTextPanel.enable();
+        var introTextField = new Ext.form.TextArea({
+            width: 550,
+            height: 200,
+            fieldLabel: this.metaDataMapIntroText,
+            id: "intro_text_area",
+            value: this.about["introtext"]
+        });
 
 
-       this.infoTextWindow = new Ext.Window({
-           title: this.about.title,
-           closeAction: 'hide',
-           items: this.infoTextPanel,
-           modal: true,
-           width: 500,
-           height:400,
-           autoScroll: true
-       });
-   },
+        var metaDataPanel = new Ext.FormPanel({
+            bodyStyle: {padding: "5px"},
+            labelAlign: "top",
+            items: [
+                titleField,
+                urlField,
+                abstractField,
+                introTextField
+            ]
+        });
+
+        metaDataPanel.enable();
+
+        var saveButton = new Ext.Button({
+            id: 'gx_saveButton',
+            text: this.metadataFormSaveText,
+            cls:'x-btn-text',
+            disabled: !this.about.title,
+            handler: function(e) {
+                checkUrlBeforeSave(false);
+            },
+            scope: this
+        });
+
+        this.metadataForm = new Ext.Window({
+            title: this.metaDataHeader,
+            closeAction: 'hide',
+            items: metaDataPanel,
+            modal: true,
+            width: 600,
+            autoHeight: true,
+            bbar: [
+                "->",
+                //saveAsButton,
+                saveButton,
+                new Ext.Button({
+                    text: this.metadataFormCancelText,
+                    cls:'x-btn-text',
+                    handler: function() {
+                        titleField.setValue(this.about.title);
+                        abstractField.setValue(this.about["abstract"]);
+                        urlField.setValue(this.about["urlsuffix"]);
+                        introTextField.setValue(this.about["introtext"]);
+                        this.metadataForm.hide();
+                    },
+                    scope: this
+                })
+            ]
+        });
+
+    },
+
+    initInfoTextWindow: function() {
+        this.infoTextPanel = new Ext.FormPanel({
+            bodyStyle: {padding: "5px"},
+            labelAlign: "top",
+            preventBodyReset: true,
+            autoScroll:false,
+            html: this.about['introtext']
+        });
+
+        this.infoTextPanel.enable();
 
 
-   initHelpTextWindow: function() {
-       this.helpTextPanel = new Ext.FormPanel({
-           bodyStyle: {padding: "5px"},
-           labelAlign: "top",
-           preventBodyReset: true,
-           autoScroll:false,
-           autoHeight:true,
-           autoLoad:{url:'/maphelp',scripts:true}
-       });
-
-       this.helpTextPanel.enable();
-
-       this.helpTextWindow = new Ext.Window({
-           title: this.helpLabel,
-           closeAction: 'hide',
-           items: this.helpTextPanel,
-           modal: true,
-           width: 1000,
-           height:500,
-           autoScroll: true
-       });
-   },
+        this.infoTextWindow = new Ext.Window({
+            title: this.about.title,
+            closeAction: 'hide',
+            items: this.infoTextPanel,
+            modal: true,
+            width: 500,
+            height:400,
+            autoScroll: true
+        });
+    },
 
 
-   initUploadPanel: function() {
-       this.uploadPanel = new Ext.Panel({
-           id: 'worldmap_update_panel',
-           title: 'Upload Layer',
-           header: false,
-           autoLoad: {url: '/upload/tab', scripts: true},
-           listeners:{
-               activate : function(panel){
-                   panel.getUpdater().refresh();
-               }
-           },
-           renderTo: 'uploadDiv'
-       });
+    initHelpTextWindow: function() {
+        this.helpTextPanel = new Ext.FormPanel({
+            bodyStyle: {padding: "5px"},
+            labelAlign: "top",
+            preventBodyReset: true,
+            autoScroll:false,
+            autoHeight:true,
+            autoLoad:{url:'/maphelp',scripts:true}
+        });
 
-   },
+        this.helpTextPanel.enable();
 
-   initCreatePanel: function() {
-       this.createPanel = new Ext.Panel({
-           id: 'worldmap_create_panel',
-           title: 'Create Layer',
-           header: false,
-           autoLoad: {url: '/layers/create_pg_layer/?tab=true', scripts: true},
-           listeners:{
-               activate : function(panel) {
-                   panel.getUpdater().refresh();
-               }
-           },
-           renderTo: 'createDiv',
-           autoScroll: true
-       });
-
-   },
-
-   initWarperPanel: function() {
-       this.warperPanel = new Ext.Panel({
-           id: 'worldmap_warper_panel',
-           title: 'Rectify Layer',
-           header: false,
-           contentEl: 'warpDiv',
-           autoScroll: true
-       });
-   },
+        this.helpTextWindow = new Ext.Window({
+            title: this.helpLabel,
+            closeAction: 'hide',
+            items: this.helpTextPanel,
+            modal: true,
+            width: 1000,
+            height:500,
+            autoScroll: true
+        });
+    },
 
 
+    initUploadPanel: function() {
+        this.uploadPanel = new Ext.Panel({
+            id: 'worldmap_update_panel',
+            title: 'Upload Layer',
+            header: false,
+            autoLoad: {url: '/upload/tab', scripts: true},
+            listeners:{
+                activate : function(panel){
+                    panel.getUpdater().refresh();
+                }
+            },
+            renderTo: 'uploadDiv'
+        });
 
-   initTabPanel: function() {
+    },
+
+    initCreatePanel: function() {
+        this.createPanel = new Ext.Panel({
+            id: 'worldmap_create_panel',
+            title: 'Create Layer',
+            header: false,
+            autoLoad: {url: '/layers/create_pg_layer/?tab=true', scripts: true},
+            listeners:{
+                activate : function(panel) {
+                    panel.getUpdater().refresh();
+                }
+            },
+            renderTo: 'createDiv',
+            autoScroll: true
+        });
+
+    },
+
+    initWarperPanel: function() {
+        this.warperPanel = new Ext.Panel({
+            id: 'worldmap_warper_panel',
+            title: 'Rectify Layer',
+            header: false,
+            contentEl: 'warpDiv',
+            autoScroll: true
+        });
+    },
+
+
+
+    initTabPanel: function() {
 //       var feedSourceTab = new gxp.FeedSourceDialog({
 //           target: this,
 //           title: "Feeds",
@@ -1089,360 +1089,360 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
 //       });
 
 
-       this.dataTabPanel = new Ext.TabPanel({
+        this.dataTabPanel = new Ext.TabPanel({
 
-           activeTab: 0,
-           region:'center',
-           items: [
-               {contentEl: 'searchDiv', title: 'WorldMap Data', autoScroll: true},
-               this.capGrid
-           ]
-       });
-       if (Ext.get("uploadDiv")) {
-           this.dataTabPanel.add(this.uploadPanel);
-           if (false && this.config["db_datastore"]) {
-               this.dataTabPanel.add(this.createPanel);
-           }
-       }
-       this.dataTabPanel.add(this.warperPanel);
+            activeTab: 0,
+            region:'center',
+            items: [
+                {contentEl: 'searchDiv', title: 'WorldMap Data', autoScroll: true},
+                this.capGrid
+            ]
+        });
+        if (Ext.get("uploadDiv")) {
+            this.dataTabPanel.add(this.uploadPanel);
+            if (false && this.config["db_datastore"]) {
+                this.dataTabPanel.add(this.createPanel);
+            }
+        }
+        this.dataTabPanel.add(this.warperPanel);
 
-   },
+    },
 
-    
-    
-    
+
+
+
     /*  Set up a simplified map config with just background layers and
-    the current map extent, to be used on the data search map */
-   getBoundingBoxConfig: function() {
-       // start with what was originally given
-       var state = this.getState();
-       state.tools = [];
-       // update anything that can change
-       var center = this.mapPanel.map.getCenter();
-       Ext.apply(state.map, {
-           center: [center.lon, center.lat],
-           zoom: this.mapPanel.map.zoom,
-           layers: []
-       });
+     the current map extent, to be used on the data search map */
+    getBoundingBoxConfig: function() {
+        // start with what was originally given
+        var state = this.getState();
+        state.tools = [];
+        // update anything that can change
+        var center = this.mapPanel.map.getCenter();
+        Ext.apply(state.map, {
+            center: [center.lon, center.lat],
+            zoom: this.mapPanel.map.zoom,
+            layers: []
+        });
 
-       // include all layer config (and add new sources)
-       this.mapPanel.layers.each(function(record) {
-           if (record.get("group") === "background") {
-               var layer = record.getLayer();
-               if (layer.displayInLayerSwitcher && layer.getVisibility() === true) {
-                   var id = record.get("source");
-                   var source = this.layerSources[id];
-                   if (!source) {
-                       throw new Error("Could not find source for layer '" + record.get("name") + "'");
-                   }
-                   // add layer
-                   state.map.layers.push(source.getConfigForRecord(record));
-                   if (!state.sources[id]) {
-                       state.sources[id] = Ext.apply({}, source.initialConfig);
-                   }
-               }
-           }
-       }, this);
+        // include all layer config (and add new sources)
+        this.mapPanel.layers.each(function(record) {
+            if (record.get("group") === "background") {
+                var layer = record.getLayer();
+                if (layer.displayInLayerSwitcher && layer.getVisibility() === true) {
+                    var id = record.get("source");
+                    var source = this.layerSources[id];
+                    if (!source) {
+                        throw new Error("Could not find source for layer '" + record.get("name") + "'");
+                    }
+                    // add layer
+                    state.map.layers.push(source.getConfigForRecord(record));
+                    if (!state.sources[id]) {
+                        state.sources[id] = Ext.apply({}, source.initialConfig);
+                    }
+                }
+            }
+        }, this);
 
-       return state;
-   },    
-    
-   /**
-    * Method: initCapGrid
-    * Constructs a window with a capabilities grid.
-    */
-   initCapGrid: function() {
-       var geoEx = this;
-       var initialSourceId, source, data = [];
-       for (var id in this.layerSources) {
-           source = this.layerSources[id];
-           if (source instanceof gxp.plugins.GeoNodeSource && source.url.replace(this.urlPortRegEx, "$1/").indexOf(this.localGeoServerBaseUrl.replace(this.urlPortRegEx, "$1/")) === 0) {
-               //do nothing
-           } else {
-               if (source.store) {
-                   data.push([id, this.layerSources[id].title || id]);
-               }
-           }
-       }
+        return state;
+    },
 
-       if (data[0] && data[0][0])
-           initialSourceId = data[0][0];
+    /**
+     * Method: initCapGrid
+     * Constructs a window with a capabilities grid.
+     */
+    initCapGrid: function() {
+        var geoEx = this;
+        var initialSourceId, source, data = [];
+        for (var id in this.layerSources) {
+            source = this.layerSources[id];
+            if (source instanceof gxp.plugins.GeoNodeSource && source.url.replace(this.urlPortRegEx, "$1/").indexOf(this.localGeoServerBaseUrl.replace(this.urlPortRegEx, "$1/")) === 0) {
+                //do nothing
+            } else {
+                if (source.store) {
+                    data.push([id, this.layerSources[id].title || id]);
+                }
+            }
+        }
 
-
-       var sources = new Ext.data.ArrayStore({
-           fields: ["id", "title"],
-           data: data
-       });
-
-       var expander = new GeoExplorer.CapabilitiesRowExpander({
-           ows: this.localGeoServerBaseUrl + "ows"
-       });
+        if (data[0] && data[0][0])
+            initialSourceId = data[0][0];
 
 
-       var addLocalLayers = function() {
-           if (!this.id) {
-               Ext.Msg.alert("Save your Map View", "You must save this map view before uploading your data");
-           }
-           else
-               document.location.href = "/layers/upload?map=" + this.id;
-       };
+        var sources = new Ext.data.ArrayStore({
+            fields: ["id", "title"],
+            data: data
+        });
+
+        var expander = new GeoExplorer.CapabilitiesRowExpander({
+            ows: this.localGeoServerBaseUrl + "ows"
+        });
 
 
-       var addLayers = function() {
-           var key = sourceComboBox.getValue();
-           var layerStore = this.mapPanel.layers;
-           var source = this.layerSources[key];
-           var records = capGridPanel.getSelectionModel().getSelections();
-           this.addLayerAjax(source, key, records);
-       };
-
-       var source = null;
-
-       if (initialSourceId) {
-           source = this.layerSources[initialSourceId];
-           source.store.filterBy(function(r) {
-               return !!source.getProjection(r);
-           }, this);
-       }
-
-       var capGridPanel = new Ext.grid.GridPanel({
-           store: source != null ? source.store : [],
-           height:300,
-           region:'center',
-           autoScroll: true,
-           autoExpandColumn: "title",
-           plugins: [expander],
-           colModel: new Ext.grid.ColumnModel([
-               expander,
-               {id: "title", header: "Title", dataIndex: "title", sortable: true}
-           ]),
-           listeners: {
-               rowdblclick: addLayers,
-               scope: this
-           }
-       });
-
-       var sourceComboBox = new Ext.form.ComboBox({
-           store: sources,
-           valueField: "id",
-           displayField: "title",
-           triggerAction: "all",
-           editable: false,
-           allowBlank: false,
-           forceSelection: true,
-           mode: "local",
-           value: initialSourceId,
-           listeners: {
-               select: function(combo, record, index) {
-                   var source = this.layerSources[record.get("id")];
-                   var store = source.store;
-                   store.setDefaultSort('title', 'asc');
-                   store.filterBy(function(r) {
-                       return !!source.getProjection(r);
-                   }, this);
-                   expander.ows = store.url;
-                   capGridPanel.reconfigure(store, capGridPanel.getColumnModel());
-                   // TODO: remove the following when this Ext issue is addressed
-                   // http://www.extjs.com/forum/showthread.php?100345-GridPanel-reconfigure-should-refocus-view-to-correct-scroller-height&p=471843
-                   capGridPanel.getView().focusRow(0);
-               },
-               scope: this
-           }
-       });
-
-       var newSourceDialog = {
-           xtype: "gxp_newsourcedialog",
-           header: false,
-           listeners: {
-               "hide": function(cmp) {
-                   if (!this.outputTarget) {
-                       cmp.ownerCt.hide();
-                   }
-               },
-               "urlselected": function(newSourceDialog, url, type) {
-                   newSourceDialog.setLoading();
-                   var ptype;
-                   switch (type) {
-                       case 'TMS':
-                           ptype = "gxp_tmssource";
-                           break;
-                       case 'REST':
-                           ptype = 'gxp_arcrestsource';
-                           break;
-                       default:
-                           ptype = 'gxp_wmscsource';
-                   }
-                   app.addLayerSource({
-                       config: {url: url, ptype: ptype, forceLoad: true},
-                       callback: function(id) {
-                           // add to combo and select
-                           var record = new sources.recordType({
-                               id: id,
-                               title: app.layerSources[id].title || "Untitled" // TODO: titles
-                           });
-                           sources.insert(0, [record]);
-                           sourceComboBox.onSelect(record, 0);
-                           newSourceDialog.hide();
-                           Ext.Ajax.request({
-                               url: "/services/registerbytype/",
-                               method: 'POST',
-                               params: {url: url, type: type},
-                               failure: function(response, options) {
-                                   //do nothing, silent fail
-                               }
-                           });
-                       },
-                       fallback: function(source,msg) {
-                           // TODO: wire up success/failure
-                           newSourceDialog.setError(
-                               new Ext.Template(newSourceDialog.addLayerSourceErrorText).apply({type: type, msg: msg})
-                           );
-                           app.busyMask.hide();
-                       },
-                       scope: app
-                   });
-               },
-               scope: app
-           }
-       };
+        var addLocalLayers = function() {
+            if (!this.id) {
+                Ext.Msg.alert("Save your Map View", "You must save this map view before uploading your data");
+            }
+            else
+                document.location.href = "/layers/upload?map=" + this.id;
+        };
 
 
-       var addWmsButton = new Ext.Button({
-           text: this.layerAdditionLabel,
-           iconCls: 'icon-add',
-           cls: 'x-btn-link-medium x-btn-text',
-           handler: function() {
-               new Ext.Window({
-                   title: gxp.NewSourceDialog.prototype.title,
-                   modal: true,
-                   hideBorders: true,
-                   width: 300,
-                   items: newSourceDialog
-               }).show();
-           }
-       });
+        var addLayers = function() {
+            var key = sourceComboBox.getValue();
+            var layerStore = this.mapPanel.layers;
+            var source = this.layerSources[key];
+            var records = capGridPanel.getSelectionModel().getSelections();
+            this.addLayerAjax(source, key, records);
+        };
 
-       var addFeedButton = new Ext.Button({
-           text: this.feedAdditionLabel,
-           iconCls: 'icon-add',
-           cls:  'x-btn-link-medium x-btn-text',
-           handler: function() {
-               this.showFeedDialog();
-               this.searchWindow.hide();
-               newSourceWindow.hide();
+        var source = null;
 
-           },
-           scope: this
-       });
+        if (initialSourceId) {
+            source = this.layerSources[initialSourceId];
+            source.store.filterBy(function(r) {
+                return !!source.getProjection(r);
+            }, this);
+        }
 
-       var app = this;
-       var newSourceWindow = new gxp.NewSourceWindow({
-           modal: true,
-           listeners: {
-               "server-added": function(url, type) {
-                   newSourceWindow.setLoading();
-                   app.addLayerSource({
-                       config: {url: url, ptype: type},
-                       callback: function(id) {
-                           // add to combo and select
-                           var record = new sources.recordType({
-                               id: id,
-                               title: app.layerSources[id].title || "Untitled" // TODO: titles
-                           });
-                           sources.insert(0, [record]);
-                           sourceComboBox.onSelect(record, 0);
-                           newSourceWindow.hide();
-                       },
-                       failure: function() {
-                           // TODO: wire up success/failure
-                           newSourceWindow.setError("Error contacting server.\nPlease check the url and try again.");
-                       },
-                       scope: app
-                   });
-               }
-           },
-           // hack to get the busy mask so we can close it in case of a
-           // communication failure
-           addSource: function(url, success, failure, scope) {
-               app.busyMask = scope.loadMask;
-           }
-       });
+        var capGridPanel = new Ext.grid.GridPanel({
+            store: source != null ? source.store : [],
+            height:300,
+            region:'center',
+            autoScroll: true,
+            autoExpandColumn: "title",
+            plugins: [expander],
+            colModel: new Ext.grid.ColumnModel([
+                expander,
+                {id: "title", header: "Title", dataIndex: "title", sortable: true}
+            ]),
+            listeners: {
+                rowdblclick: addLayers,
+                scope: this
+            }
+        });
+
+        var sourceComboBox = new Ext.form.ComboBox({
+            store: sources,
+            valueField: "id",
+            displayField: "title",
+            triggerAction: "all",
+            editable: false,
+            allowBlank: false,
+            forceSelection: true,
+            mode: "local",
+            value: initialSourceId,
+            listeners: {
+                select: function(combo, record, index) {
+                    var source = this.layerSources[record.get("id")];
+                    var store = source.store;
+                    store.setDefaultSort('title', 'asc');
+                    store.filterBy(function(r) {
+                        return !!source.getProjection(r);
+                    }, this);
+                    expander.ows = store.url;
+                    capGridPanel.reconfigure(store, capGridPanel.getColumnModel());
+                    // TODO: remove the following when this Ext issue is addressed
+                    // http://www.extjs.com/forum/showthread.php?100345-GridPanel-reconfigure-should-refocus-view-to-correct-scroller-height&p=471843
+                    capGridPanel.getView().focusRow(0);
+                },
+                scope: this
+            }
+        });
+
+        var newSourceDialog = {
+            xtype: "gxp_newsourcedialog",
+            header: false,
+            listeners: {
+                "hide": function(cmp) {
+                    if (!this.outputTarget) {
+                        cmp.ownerCt.hide();
+                    }
+                },
+                "urlselected": function(newSourceDialog, url, type) {
+                    newSourceDialog.setLoading();
+                    var ptype;
+                    switch (type) {
+                        case 'TMS':
+                            ptype = "gxp_tmssource";
+                            break;
+                        case 'REST':
+                            ptype = 'gxp_arcrestsource';
+                            break;
+                        default:
+                            ptype = 'gxp_wmscsource';
+                    }
+                    app.addLayerSource({
+                        config: {url: url, ptype: ptype, forceLoad: true},
+                        callback: function(id) {
+                            // add to combo and select
+                            var record = new sources.recordType({
+                                id: id,
+                                title: app.layerSources[id].title || "Untitled" // TODO: titles
+                            });
+                            sources.insert(0, [record]);
+                            sourceComboBox.onSelect(record, 0);
+                            newSourceDialog.hide();
+                            Ext.Ajax.request({
+                                url: "/services/registerbytype/",
+                                method: 'POST',
+                                params: {url: url, type: type},
+                                failure: function(response, options) {
+                                    //do nothing, silent fail
+                                }
+                            });
+                        },
+                        fallback: function(source,msg) {
+                            // TODO: wire up success/failure
+                            newSourceDialog.setError(
+                                new Ext.Template(newSourceDialog.addLayerSourceErrorText).apply({type: type, msg: msg})
+                            );
+                            app.busyMask.hide();
+                        },
+                        scope: app
+                    });
+                },
+                scope: app
+            }
+        };
 
 
-       var addLayerButton = new Ext.Button({
-           text: "Add Layers",
-           iconCls: "gxp-icon-addlayers",
-           handler: addLayers,
-           scope : this
-       });
+        var addWmsButton = new Ext.Button({
+            text: this.layerAdditionLabel,
+            iconCls: 'icon-add',
+            cls: 'x-btn-link-medium x-btn-text',
+            handler: function() {
+                new Ext.Window({
+                    title: gxp.NewSourceDialog.prototype.title,
+                    modal: true,
+                    hideBorders: true,
+                    width: 300,
+                    items: newSourceDialog
+                }).show();
+            }
+        });
+
+        var addFeedButton = new Ext.Button({
+            text: this.feedAdditionLabel,
+            iconCls: 'icon-add',
+            cls:  'x-btn-link-medium x-btn-text',
+            handler: function() {
+                this.showFeedDialog();
+                this.searchWindow.hide();
+                newSourceWindow.hide();
+
+            },
+            scope: this
+        });
+
+        var app = this;
+        var newSourceWindow = new gxp.NewSourceWindow({
+            modal: true,
+            listeners: {
+                "server-added": function(url, type) {
+                    newSourceWindow.setLoading();
+                    app.addLayerSource({
+                        config: {url: url, ptype: type},
+                        callback: function(id) {
+                            // add to combo and select
+                            var record = new sources.recordType({
+                                id: id,
+                                title: app.layerSources[id].title || "Untitled" // TODO: titles
+                            });
+                            sources.insert(0, [record]);
+                            sourceComboBox.onSelect(record, 0);
+                            newSourceWindow.hide();
+                        },
+                        failure: function() {
+                            // TODO: wire up success/failure
+                            newSourceWindow.setError("Error contacting server.\nPlease check the url and try again.");
+                        },
+                        scope: app
+                    });
+                }
+            },
+            // hack to get the busy mask so we can close it in case of a
+            // communication failure
+            addSource: function(url, success, failure, scope) {
+                app.busyMask = scope.loadMask;
+            }
+        });
 
 
-       var sourceAdditionLabel = { xtype: 'box', autoEl: { tag: 'span',  html: this.layerSelectionLabel }};
-
-       var sourceForm = new Ext.Panel({
-           frame:false,
-           border: false,
-           region: 'north',
-           height:40,
-           layout: new Ext.layout.HBoxLayout({
-               defaultMargins: {
-                   top: 10,
-                   bottom: 10,
-                   left: 10,
-                   right: 0
-               }
-           }),
-           items: [sourceAdditionLabel, sourceComboBox, {xtype: 'spacer', width:20 }, addWmsButton, addFeedButton]
-       });
+        var addLayerButton = new Ext.Button({
+            text: "Add Layers",
+            iconCls: "gxp-icon-addlayers",
+            handler: addLayers,
+            scope : this
+        });
 
 
-       var addLayerForm = new Ext.Panel({
-           frame:false,
-           border: false,
-           region: 'south',
-           layout: new Ext.layout.HBoxLayout({
-               defaultMargins: {
-                   top: 10,
-                   bottom: 10,
-                   left: 10,
-                   right: 0
-               }
-           }),
-           items: [addLayerButton]
-       });
+        var sourceAdditionLabel = { xtype: 'box', autoEl: { tag: 'span',  html: this.layerSelectionLabel }};
 
-       this.capGrid = new Ext.Panel({
-           autoScroll: true,
-           title: 'External Data',
-           header: false,
-           layout: 'border',
-           border: false,
-           renderTo: 'externalDiv',
-           padding:'2 0 0 20',
-           items: [sourceForm, capGridPanel, addLayerForm],
-           listeners: {
-               hide: function(win) {
-                   capGridPanel.getSelectionModel().clearSelections();
-               }
-           }
-       });
-   },
+        var sourceForm = new Ext.Panel({
+            frame:false,
+            border: false,
+            region: 'north',
+            height:40,
+            layout: new Ext.layout.HBoxLayout({
+                defaultMargins: {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 0
+                }
+            }),
+            items: [sourceAdditionLabel, sourceComboBox, {xtype: 'spacer', width:20 }, addWmsButton, addFeedButton]
+        });
 
-   /**
-    * Method: showCapabilitiesGrid
-    * Shows the window with a capabilities grid.
-    */
-   showCapabilitiesGrid: function() {
-       if (!this.capGrid) {
-           this.initCapGrid();
-       }
-       this.capGrid.show();
-   },   
-   
-   
-   
-   
-   
+
+        var addLayerForm = new Ext.Panel({
+            frame:false,
+            border: false,
+            region: 'south',
+            layout: new Ext.layout.HBoxLayout({
+                defaultMargins: {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 0
+                }
+            }),
+            items: [addLayerButton]
+        });
+
+        this.capGrid = new Ext.Panel({
+            autoScroll: true,
+            title: 'External Data',
+            header: false,
+            layout: 'border',
+            border: false,
+            renderTo: 'externalDiv',
+            padding:'2 0 0 20',
+            items: [sourceForm, capGridPanel, addLayerForm],
+            listeners: {
+                hide: function(win) {
+                    capGridPanel.getSelectionModel().clearSelections();
+                }
+            }
+        });
+    },
+
+    /**
+     * Method: showCapabilitiesGrid
+     * Shows the window with a capabilities grid.
+     */
+    showCapabilitiesGrid: function() {
+        if (!this.capGrid) {
+            this.initCapGrid();
+        }
+        this.capGrid.show();
+    },
+
+
+
+
+
     initSearchWindow: function() {
 
         var mapBounds = this.mapPanel.map.getExtent();
@@ -1605,9 +1605,9 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         /* PUT to this url to update an existing map */
         return this.rest + this.id + '/data';
     },
-  
-    
-    
+
+
+
     addInfo : function() {
         var queryableLayers = this.mapPanel.layers.queryBy(function(x) {
             return x.get("queryable");
@@ -1624,8 +1624,8 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             }
         }, this);
 
-    },    
-    
+    },
+
     getCategoryTitle: function(record){
         var subject = this.defaultTopic || "General";
         try {
@@ -1657,39 +1657,60 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         for (var i = 0, ii = records.length; i < ii; ++i) {
             var thisRecord = records[i];
             if (isLocal) {
-                //Get all the required WMS parameters from the GeoNode/Worldmap database
-                // instead of GetCapabilities
-                var layer = records[i].get("name");
-                var tiled = records[i].get("tiled");
+                Ext.Ajax.request({
+                    url: "/maps/addgeonodelayer/",
+                    method: "POST",
+                    params: {layername:thisRecord.get("name")},
+
+                    success: function(result, request) {
+                        var jsonData = Ext.util.JSON.decode(result.responseText);
+                        layer = jsonData.layer;
+                        var local = layer.url.indexOf(
+                            geoEx.localGeoServerBaseUrl.replace(
+                                this.urlPortRegEx, "$1/")) === 0;
+                        if (!local) {
+                            //Need to create a new source
+                            source = geoEx.addLayerSource({"config":layer.source_params});
+                            key = source.id;
+                        }
+
+                        layer.source = key;
+
+                        var record = source.createLayerRecord(layer);
+                        record.selected = true;
+                        //console.log('Created record');
+                        ////console.log('GROUP:' + record.get("group"));
+                        if (record) {
+                            if (record.get("group") === "background") {
+                                var pos = layerStore.queryBy(
+                                    function(rec) {
+                                        return rec.get("group") === "background"
+                                    }).getCount();
+                                layerStore.insert(pos, [record]);
+
+                            } else {
+                                layer.buffer = 0;
+                                layer.tiled = true;
+                                category = record.get("group");
+                                if (!category || category == '')
+                                    record.set("group", "General");
+
+                                geoEx.layerTree.addCategoryFolder({"group":record.get("group")}, true);
+                                layerStore.add([record]);
 
 
-                
-                var source = dataSource;
-                var recbox = thisRecord.get("bbox");
-                var bounds = new OpenLayers.Bounds(recbox.minx,recbox.miny,recbox.maxx,recbox.maxy);
-                var mapProjection = this.mapPanel.map.getProjection();
-                var bbox = bounds.transform("EPSG:4326", mapProjection);
-                var layerConfig = {
-                		srs: mapProjection,
-                		bbox: bbox.toArray(),
-                		source: dataSource.id,
-                		name: thisRecord.get("name"),
-                		title: thisRecord.get("title"),
-                		url: this.localGeoServerBaseUrl + "wms"
-                };
+                                //geoEx.reorderNodes(record.getLayer());
+                                geoEx.layerTree.overlayRoot.findDescendant("layer", record.getLayer()).select();
+                            }
 
-                var record = source.createLayerRecord(layerConfig);
-                record.set("group", this.getCategoryTitle(thisRecord));
-                if (this.layerTree) {
-                    this.layerTree.addCategoryFolder({"group":record.get("group")});
-                }
 
-                this.mapPanel.layers.add(record);
-                if (bbox) {
-                    this.mapPanel.map.zoomToExtent(bbox);
-                }               
-                
+                        }
+                    },
+                    failure: function(result, request) {
+                        //No permission to view
+                    }
 
+                });
             } else {
                 //Not a local GeoNode layer, use source's standard method for creating the layer.
                 var layer = records[i].get("name");
@@ -1722,38 +1743,38 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
     },
 
     /** private: method[save]
-    *
-    * Saves the map config and displays the URL in a window.
-    */
-   save: function(callback, scope) {
-       var configStr = Ext.util.JSON.encode(this.getState());
-       var method, url;
-       if (this.id) {
-           method = "PUT";
-           url = "../maputils/" + this.id;
-       } else {
-           method = "POST";
-           url = "../maputils/";
-       }
-       var requestConfig = {
-           method: method,
-           url: url,
-           data: configStr
-       };
-       if (this.fireEvent("beforesave", requestConfig, callback) !== false) {
-           OpenLayers.Request.issue(Ext.apply(requestConfig, {
-               callback: function(request) {
-                   this.handleSave(request);
-                   if (callback) {
-                       callback.call(scope || this);
-                   }
-               },
-               scope: this
-           }));
-       }
-   },    
-    
-    
+     *
+     * Saves the map config and displays the URL in a window.
+     */
+    save: function(callback, scope) {
+        var configStr = Ext.util.JSON.encode(this.getState());
+        var method, url;
+        if (this.id) {
+            method = "PUT";
+            url = "../maputils/" + this.id;
+        } else {
+            method = "POST";
+            url = "../maputils/";
+        }
+        var requestConfig = {
+            method: method,
+            url: url,
+            data: configStr
+        };
+        if (this.fireEvent("beforesave", requestConfig, callback) !== false) {
+            OpenLayers.Request.issue(Ext.apply(requestConfig, {
+                callback: function(request) {
+                    this.handleSave(request);
+                    if (callback) {
+                        callback.call(scope || this);
+                    }
+                },
+                scope: this
+            }));
+        }
+    },
+
+
     /** api: method[save]
      *  :arg as: ''Boolean'' True if map should be "Saved as..."
      *
@@ -1775,7 +1796,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         if (!this.id) {
             /* create a new map */
             Ext.Ajax.request({
-            	url: "/maps/new/data",
+                url: "/maps/new/data",
                 method: 'POST',
                 jsonData: config,
                 success: function(response, options) {
@@ -1802,7 +1823,7 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         else {
             /* save an existing map */
             Ext.Ajax.request({
-            	url: "/maps/" + this.id,
+                url: "/maps/" + this.id,
                 method: 'PUT',
                 jsonData: config,
                 success: function(response, options) {
@@ -1869,5 +1890,5 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
             scope: this
         });
     }
-    
+
 });
