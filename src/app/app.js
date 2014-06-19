@@ -54,6 +54,7 @@
  * @require plugins/TMSSource.js
  * @require plugins/StamenSource.js
  * @require plugins/GazetteerTool.js
+ * @require plugins/GeoLocator.js
  * @require widgets/WMSLayerPanel.js
  * @require widgets/FeedSourceWindow.js
  * @require widgets/SearchBar.js

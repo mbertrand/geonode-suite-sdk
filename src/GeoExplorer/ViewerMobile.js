@@ -1,7 +1,12 @@
 /**
  * Copyright (c) 2009-2010 The Open Planning Project
  *
- * @requires GeoExplorer.js
+ * @require GeoExplorer.js
+ * @require OpenLayers/Control/TouchNavigation.js
+ * @require OpenLayers/Control/Zoom.js
+ * @require OpenLayers/Control/PinchZoom.js
+ * @require OpenLayers/Control/Geolocate.js
+ * @require plugins/GeoLocator.js
  */
 
 /** api: (define)
@@ -17,16 +22,16 @@ Ext.namespace("gxp");
  *  Create a GeoExplorer application suitable for embedding in larger pages.
  */
 GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
-    
+
     /** api: config[useCapabilities]
      *  ``Boolean`` If set to false, no Capabilities document will be loaded.
      */
-    
+
     /** api: config[useToolbar]
      *  ``Boolean`` If set to false, no top toolbar will be rendered.
      */
 
-	
+
     initMapPanel: function() {
         this.mapItems = [];
 
@@ -59,7 +64,7 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
                 });
             }
         });
-        
+
         this.westPanel = new Ext.Panel({
             layout: "fit",
             id: "westpanel",
@@ -94,11 +99,11 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
                     }
                 }
             }
-        });        
+        });
 
-    },	
-	
-	
+    },
+
+
     loadConfig: function(config) {
         var source;
         for (var s in config.sources) {
@@ -136,25 +141,25 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
                 autoScroll: true,
                 outputConfig: {
                     id: "treecontent",
-		            width: "100%",
+                    width: "100%",
                     autoScroll: true
                 },
                 outputTarget: "westpanel"
             });
         }
-        
 
-        
-        
+
+
+
         // load the super's super, because we don't want the default tools from
         // GeoExplorer
         GeoExplorer.superclass.loadConfig.apply(this, arguments);
     },
 
-    
+
     initInfoTextWindow: function() {
         this.infoTextPanel = new Ext.FormPanel({
-        	layout: 'fit',
+            layout: 'fit',
             bodyStyle: {padding: "5px"},
             labelAlign: "top",
             preventBodyReset: true,
@@ -178,14 +183,14 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
                 text: 'Close',
                 width: "100%",
                 handler: function(){
-                	this.infoTextWindow.close(); 
+                    this.infoTextWindow.close();
                 },
                 scope: this
-                }]
+            }]
         });
     },
-    
-    
+
+
     /** private: method[initPortal]
      * Create the various parts that compose the layout.
      */
@@ -209,7 +214,7 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
         }
 
 
-        
+
         this.mapPanelContainer = new Ext.Panel({
             layout: "card",
             region: "center",
@@ -230,7 +235,7 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
             this.mapPanelContainer,
             this.westPanel
         ];
-        
+
         var gridWinPanel = new Ext.Panel({
             id: 'gridWinPanel',
             collapseMode: "mini",
@@ -260,26 +265,26 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
             width: "100%",
             height: 400
         });
-        
-        
+
+
         this.about["introtext"] = "Hello";
-        
+
         GeoExplorer.superclass.initPortal.apply(this, arguments);
-        
-        
+
+
         //Show the info window if it's the first time here
-        if (this.config.first_visit_mobile) {
-        	this.about["introtext"] = Ext.get("mobile_intro").dom.innerHTML;
+        if (this.first_visit_mobile) {
+            this.about["introtext"] = Ext.get("mobile_intro").dom.innerHTML;
             if (!this.infoTextWindow) {
                 this.initInfoTextWindow();
             }
-            this.infoTextWindow.show();  	
+            this.infoTextWindow.show();
             this.infoTextWindow.alignTo(document, 'tl-tl');
         }
 
 
     },
-    
+
     /**
      * private: method[addLayerSource]
      */
@@ -321,5 +326,115 @@ GeoExplorer.ViewerMobile = Ext.extend(GeoExplorer, {
         tools.push(aboutButton);
 
         return tools;
+    },
+
+    /** private: method[createMapOverlay]
+     * Builds the :class:`Ext.Panel` containing components to be overlaid on the
+     * map, setting up the special configuration for its layout and
+     * map-friendliness.
+     */
+    createMapOverlay: function() {
+
+        var cgaLink = new Ext.BoxComponent({
+            html:'<div class="cga-link" onclick="javascript:window.open(\'http://gis.harvard.edu\', \'_blank\');"><a href="http://gis.harvard.edu">Center for Geographic Analysis</a></div>'
+        });
+
+        var scaleLinePanel = new Ext.BoxComponent({
+            autoEl: {
+                tag: "div",
+                cls: "olControlScaleLine overlay-element overlay-scaleline"
+            }
+        });
+
+        scaleLinePanel.on('render', function() {
+            var scaleLine = new OpenLayers.Control.ScaleLine({
+                div: scaleLinePanel.getEl().dom,
+                geodesic: true
+            });
+
+            this.mapPanel.map.addControl(scaleLine);
+            scaleLine.activate();
+        }, this);
+
+        var zoomSelectorWrapper = new Ext.Panel({
+            cls: 'overlay-element overlay-scalechooser',
+            ctCls: 'transparent-panel',
+            border: false
+        });
+
+        this.on("ready", function() {
+            var zoomStore = new GeoExt.data.ScaleStore({
+                map: this.mapPanel.map
+            });
+
+            var zoomSelector = new Ext.form.ComboBox({
+                emptyText: this.zoomSelectorText,
+                tpl: '<tpl for="."><div class="x-combo-list-item">1 : {[parseInt(values.scale)]}</div></tpl>',
+                editable: false,
+                triggerAction: 'all',
+                mode: 'local',
+                store: zoomStore,
+                width: 110
+            });
+
+            zoomSelector.on({
+                click: function(evt) {
+                    evt.stopEvent();
+                },
+                mousedown: function(evt) {
+                    evt.stopEvent();
+                },
+                select: function(combo, record, index) {
+                    this.mapPanel.map.zoomTo(record.data.level);
+                },
+                scope: this
+            });
+
+            function setScale() {
+                var scale = zoomStore.queryBy(function(record) {
+                    return this.mapPanel.map.getZoom() == record.data.level;
+                }, this);
+
+                if (scale.length > 0) {
+                    scale = scale.items[0];
+                    zoomSelector.setValue("1 : " + parseInt(scale.data.scale, 10));
+                } else {
+                    if (!zoomSelector.rendered) {
+                        return;
+                    }
+                    zoomSelector.clearValue();
+                }
+            }
+
+            setScale.call(this);
+            this.mapPanel.map.events.register('zoomend', this, setScale);
+
+            zoomSelectorWrapper.add(zoomSelector);
+            zoomSelectorWrapper.doLayout();
+        }, this);
+
+        var mapOverlay = new Ext.Panel({
+            // title: "Overlay",
+            cls: 'map-overlay',
+            items: [
+                scaleLinePanel,
+                zoomSelectorWrapper,
+                cgaLink
+            ]
+        });
+
+        mapOverlay.on("afterlayout", function() {
+            scaleLinePanel.getEl().dom.style.position = 'relative';
+            scaleLinePanel.getEl().dom.style.display = 'inline';
+
+            mapOverlay.getEl().on("click", function(x) {
+                x.stopEvent();
+            });
+            mapOverlay.getEl().on("mousedown", function(x) {
+                x.stopEvent();
+            });
+        }, this);
+
+        return mapOverlay;
     }
 });

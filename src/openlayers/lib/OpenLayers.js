@@ -235,6 +235,7 @@
                 "OpenLayers/Control/DrawFeature.js",
                 "OpenLayers/Control/DragFeature.js",
                 "OpenLayers/Control/ModifyFeature.js",
+                "OpenLayers/Control/TouchNavigation.js",
                 "OpenLayers/Control/Panel.js",
                 "OpenLayers/Control/SelectFeature.js",
                 "OpenLayers/Control/NavigationHistory.js",
