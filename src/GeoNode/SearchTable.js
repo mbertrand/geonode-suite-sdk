@@ -32,30 +32,31 @@ GeoNode.SearchTable = Ext.extend(Ext.util.Observable, {
     loadData: function() {
     
         this.searchStore = new Ext.data.JsonStore({
-            url: this.searchURL,
-            root: 'results',
-            idProperty: 'iid',
+            proxy : new Ext.data.HttpProxy({
+                method: 'GET',
+                url: this.searchURL
+            }),
+            root: 'objects',
+            idProperty: 'oid',
             remoteSort: true,
-            totalProperty: 'total',
+            totalProperty: 'meta.total_count',
             fields: [
-                {name: 'category', type: 'string'}, 
+                {name: 'category', type: 'string'},
                 {name: 'rating', type: 'float'},
-                {name: '_type', type: 'string'},
+                {name: 'type', type: 'string'},
                 {name: 'name', type: 'string'},
-                {name: 'links'},
                 {name: 'title', type: 'string'},
-                {name: 'relevance', type: 'int'},
-                {name: 'abstract', type: 'string'},
-                {name: 'detail', type: 'string'},
-                {name: 'iid', type: 'string'},
+                {name: 'description', type: 'string'},
+                {name: 'detail_url', type: 'string'},
+                {name: 'oid', type: 'string'},
                 {name: 'keywords'},
-                {name: 'last_modified', type: 'date'},
-                {name: 'bbox'},
+                {name: 'modified', type: 'date'},
+                {name: 'bbox_bottom'},
+                {name: 'bbox_left'},
+                {name: 'bbox_top'},
+                {name: 'bbox_right'},
                 {name: 'owner', type: 'string'},
-                {name: 'storeType', type: 'string'},
-                {name: 'owner_detail', type: 'string'},
-                {name: 'id', type: 'int'},
-                {name: '_display_type', type: 'string'}
+                {name: 'subtype', type: 'string'}
             ]
         });
         this.searchStore.on('load', function() {
@@ -76,8 +77,8 @@ GeoNode.SearchTable = Ext.extend(Ext.util.Observable, {
         if (!this.searchParams) {
             this.searchParams = {};
         }
-        if (!this.searchParams.start) {
-            this.searchParams.start = 0;
+        if (!this.searchParams.offset) {
+            this.searchParams.offset = 0;
         }
         if (!this.searchParams.limit) {
             this.searchParams.limit = 25;
@@ -93,7 +94,7 @@ GeoNode.SearchTable = Ext.extend(Ext.util.Observable, {
     doSearch: function() {
         /* updates parameters from constraints and 
            permforms a new search */
-        this.searchParams.start = 0;
+        this.searchParams.offset = 0;
         if (this.constraints) {
             for (var i = 0; i < this.constraints.length; i++) {
                 this.constraints[i].applyConstraint(this.searchParams);
@@ -111,14 +112,14 @@ GeoNode.SearchTable = Ext.extend(Ext.util.Observable, {
     },
 
     loadNextBatch: function() {
-        this.searchParams.start += this.searchParams.limit;
+        this.searchParams.offset += this.searchParams.limit;
         this._search(this.searchParams);
     },
     
     loadPrevBatch: function() {
-        this.searchParams.start -= this.searchParams.limit;
-        if (this.searchParams.start < 0) {
-            this.searchParams.start = 0;
+        this.searchParams.offset -= this.searchParams.limit;
+        if (this.searchParams.offset < 0) {
+            this.searchParams.offset = 0;
         }
         this._search(this.searchParams);
     },
@@ -132,21 +133,21 @@ GeoNode.SearchTable = Ext.extend(Ext.util.Observable, {
     updateControls: function() {
         var total = this.searchStore.getTotalCount();
 
-        if (this.searchParams.start > 0) {
+        if (this.searchParams.offset > 0) {
             this.prevButton.setDisabled(false);
         }
         else {
             this.prevButton.setDisabled(true);
         }
         
-        if (this.searchParams.start + this.searchParams.limit < total) {
+        if (this.searchParams.offset + this.searchParams.limit < total) {
             this.nextButton.setDisabled(false);
         }
         else {
             this.nextButton.setDisabled(true);
         }
         
-        var minItem = this.searchParams.start + 1;
+        var minItem = this.searchParams.offset + 1;
         var maxItem = minItem + this.searchParams.limit - 1;
         if (minItem > total) {
             minItem = total;
@@ -236,7 +237,7 @@ GeoNode.SearchTable = Ext.extend(Ext.util.Observable, {
                 sortable: true,
                 renderer: function(value, metaData, record, rowIndex, colIndex, store) {
                     //var is_local = record.get('_local');
-                    var detail = record.get('detail');
+                    var detail = record.get('detail_url');
 
                     /* do not show detail link for layers without read permission */
                     /*

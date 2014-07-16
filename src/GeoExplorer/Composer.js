@@ -1461,10 +1461,10 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
         this.searchTable = new GeoNode.SearchTable({
             renderTo: 'search_results',
             trackSelection: true,
-            permalinkURL: '/search/api/data',
-            searchURL: '/search/api/data',
+            permalinkURL: '/api/base/search/',
+            searchURL: '/api/base/search/',
             constraints: [this.bbox],
-            searchParams: {'limit':10, 'bbox': llbounds.toBBOX(), 'type': 'layer'},
+            searchParams: {'type__in':'layer', 'limit':10, 'bbox': llbounds.toBBOX()},
             searchOnLoad: false
         });
 
