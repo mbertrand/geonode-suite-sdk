@@ -45,6 +45,7 @@ GeoNode.SearchTable = Ext.extend(Ext.util.Observable, {
                 {name: 'rating', type: 'float'},
                 {name: 'type', type: 'string'},
                 {name: 'name', type: 'string'},
+                {name: 'service_typename', type: 'string'},
                 {name: 'title', type: 'string'},
                 {name: 'description', type: 'string'},
                 {name: 'detail_url', type: 'string'},

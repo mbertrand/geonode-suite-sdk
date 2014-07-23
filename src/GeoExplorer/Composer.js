@@ -1660,17 +1660,16 @@ GeoExplorer.Composer = Ext.extend(GeoExplorer, {
                 Ext.Ajax.request({
                     url: "/maps/addgeonodelayer/",
                     method: "POST",
-                    params: {layername:thisRecord.get("name")},
+                    params: {layername:thisRecord.get("service_typename")},
 
                     success: function(result, request) {
                         var jsonData = Ext.util.JSON.decode(result.responseText);
                         layer = jsonData.layer;
-                        var local = layer.url.indexOf(
-                            geoEx.localGeoServerBaseUrl.replace(
-                                this.urlPortRegEx, "$1/")) === 0;
+                        var local = !layer.url;
                         if (!local) {
                             //Need to create a new source
                             source = geoEx.addLayerSource({"config":layer.source_params});
+                            source.lazy = true;
                             key = source.id;
                         }
 

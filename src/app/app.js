@@ -1,5 +1,5 @@
 /**
- * Add all your dependencies here. 
+ * Add all your dependencies here.
  * @require widgets/Viewer.js
  * @require plugins/LayerTree.js
  * @require plugins/LayerManager.js
@@ -62,6 +62,7 @@
  * @require widgets/CrumbPanel.js
  * @require widgets/GoogleEarthPanel.js
  * @require widgets/NewSourceWindow.js
+ * @require menu/LayerMenu.js
  * @require widgets/
  * @require GeoExplorer.js
  * @require Composer.js
