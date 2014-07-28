@@ -456,6 +456,12 @@ GeoNode.plugins.LayerInfo = Ext.extend(gxp.plugins.Tool, {
      */
     iconCls: "gxp-icon-layerproperties",
 
+    /** api: config[linkPrefix]
+     *  ``String``
+     *  URL to prefix onto layer service_typename for info URL.
+     */
+    linkPrefix: "/layers/",
+
     /** api: method[addActions]
      *  :returns: ``Array`` The actions added.
      */
@@ -465,16 +471,41 @@ GeoNode.plugins.LayerInfo = Ext.extend(gxp.plugins.Tool, {
             iconCls: this.iconCls,
             disabled: true,
             handler: function() {
-                // TODO is there a way to get this from a template variable?
-                var url = "/layers/" + this.target.selectedLayer.get("name");
-                window.open(url);
+                window.open(this.url);
             },
             scope: this
         }]);
         var layerInfoAction = actions[0];
 
         this.target.on("layerselectionchange", function(record) {
-            layerInfoAction.setDisabled(!record || !record.get('restUrl'));
+            var remote=null;
+            if (record){
+                if (record.get("source_params")) {
+                    remote = record.get("source_params").name;
+                }
+                else {
+                    var store = this.target.sources[record.get("source")];
+                    if (store && store["name"]){
+                        remote = store["name"];
+                    }
+                }
+            }
+
+            layerInfoAction.setDisabled(
+                !record || !record.get("properties") || (!remote &&
+                    record.getLayer().url.replace(
+                            this.target.urlPortRegEx, "$1/").indexOf(
+                            this.target.localGeoServerBaseUrl.replace(
+                                this.urlPortRegEx, "$1/")) !== 0)
+            );
+            if (!layerInfoAction.isDisabled()) {
+                var layerid = record.getLayer().params.LAYERS;
+                if (record.getLayer() instanceof OpenLayers.Layer.ArcGIS93Rest) {
+                    layerid = layerid.replace("show:","");
+                }
+
+                this.url = this.linkPrefix + (remote? remote + ":" : "") + layerid;
+            }
         }, this);
         return actions;
     }
